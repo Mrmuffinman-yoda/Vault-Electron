@@ -4,7 +4,6 @@
 //import 'E:/Final Year Project work/Electron build/vault_electron/bower_components/firebase/firebase-firestore.js';
 //import firebase from './firebase/app';
 //import './firebase/firestore';
-console.log("Firebase configuration")
 //firebase API key
 const firebaseConfig = {
   apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
@@ -19,7 +18,6 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 const firestore = firebase.firestore();
-console.log("Stun servers loaded")
 //Stun servers config for WebRTC
 const servers = {
   iceServers: [
@@ -34,7 +32,6 @@ const servers = {
 const peerConnection = new RTCPeerConnection(servers);
 
 // HTML elements
-console.log("HTML elements loaded")
 const answerButton = document.getElementById('sendButton');
 const textBox = document.getElementById('formFile')
 const checker = document.getElementById('checkbutton')
@@ -98,7 +95,6 @@ answerButton.onclick = async () => {
 
   offerCandidates.onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {
-      console.log(change);
       if (change.type === 'added') {
         let data = change.doc.data();
         peerConnection.addIceCandidate(new RTCIceCandidate(data));
@@ -110,8 +106,7 @@ answerButton.onclick = async () => {
 peerConnection.addEventListener('connectionstatechange', event => {
   console.log("Listening for connection")
   if (peerConnection.connectionState === 'connected') {
-      console.log("Peers Connected")
-      console.log("Status:" + peerConnection.connectionState)
+      console.log("[STATUS]:" + peerConnection.connectionState)
   }
 // });
 // checker.onclick = async() =>{

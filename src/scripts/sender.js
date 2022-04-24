@@ -1,10 +1,3 @@
- //import firebase from './bower_components/firebase/firebase.js';
-// import './bower_components/firebase/firebase-firestore.js';
-//import firebase from 'E:/Final Year Project work/Electron build/vault_electron/bower_components/firebase/firebase.js'
-//import 'E:/Final Year Project work/Electron build/vault_electron/bower_components/firebase/firebase-firestore.js';
-//import firebase from './firebase/app';
-//import './firebase/firestore';
-console.log("Firebase configuration")
 //firebase API key
 const firebaseConfig = {
   apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
@@ -36,13 +29,12 @@ const rc = new RTCPeerConnection(servers);
   
 //Grabbing HTML elements for use in javascript file
 
-console.log("HTML elements loaded")
 const callButton = document.getElementById("callButton");
 const sendButton = document.getElementById("sendButton"); 
 const callInput = document.getElementById("callInput");
 const file = document.getElementById("formFile");
 
-console.log("Creating data channel");
+// After ice candidates are exchanged , open data channel based on senders data channel
 const sendChannel = rc.createDataChannel("sendChannel");
 sendChannel.onopen = () => {
   var readyState = sendChannel.readyState;
@@ -74,7 +66,6 @@ callButton.onclick = async() =>{
         event.candidate && offerCandidates.add(event.candidate.toJSON());
 
     };
-    console.log("Creating offers");
     const offerDescription = await rc.createOffer();
     await rc.setLocalDescription(offerDescription);
 
@@ -86,7 +77,6 @@ callButton.onclick = async() =>{
 
     // Listen for remote answer
     callDoc.onSnapshot((snapshot) => {
-    console.log("Remote answer")
     const data = snapshot.data();
     if (!rc.currentRemoteDescription && data?.answer) {
       const answerDescription = new RTCSessionDescription(data.answer);
@@ -96,7 +86,6 @@ callButton.onclick = async() =>{
 
     //When remote call answered , add candidates to peer connection
     answerCandidates.onSnapshot((snapshot)=>{
-        console.log("Candidate added to peer connections")
         snapshot.docChanges().forEach((change)=> {
             if(change.type === "added"){
                 const candidate = new RTCIceCandidate(change.doc.data());
@@ -107,14 +96,47 @@ callButton.onclick = async() =>{
 
 // Listen for connectionstatechange on the local RTCPeerConnection
 rc.addEventListener('connectionstatechange', event => {
-    console.log("Listening for connection")
+  console.log("Listening for connection")
     if (rc.connectionState === 'connected') {
-        console.log("Peers Connected")
-        console.log("Status:" + sendChannel.readyState)
+        console.log("[STATUS]:" + sendChannel.readyState)
     }
   });
 sendChannel.onmessage = (event) => {
-    console.log("Message received")
-    console.log(event.data)
+    console.log("Message received: " + event.data);
   }
+}
+//send file
+sendButton.onclick = async() =>{
+    console.log("Sending file")
+    const file = document.getElementById("formFile").files[0];
+    const fileReader = new FileReader();
+    fileReader.onload = async() =>{
+        const fileData = fileReader.result;
+        const fileName = file.name;
+        const fileType = file.type;
+        const fileSize = file.size;
+        const fileBlob = new Blob([fileData], {type: fileType});
+        const fileRef = firestore.collection("files").doc();
+        const fileId = fileRef.id;
+        const fileDoc = firestore.collection("files").doc(fileId);
+        await fileDoc.set({
+            fileName,
+            fileType,
+            fileSize,
+            fileBlob,
+        });
+        const fileUrl = await fileRef.get().then(doc => {
+            if (!doc.exists) {
+                console.log("No such document!");
+            } else {
+                console.log("Document data:", doc.data());
+                return doc.data().fileBlob;
+            }
+        }).catch(err => {
+            console.log("Error getting document", err);
+        });
+        console.log("File url:" + fileUrl)
+        sendChannel.send(fileUrl);
+    }
+    fileReader.readAsArrayBuffer(file);
 }
