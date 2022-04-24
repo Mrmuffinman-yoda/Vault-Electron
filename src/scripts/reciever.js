@@ -37,14 +37,29 @@ const pc = new RTCPeerConnection(servers);
 console.log("HTML elements loaded")
 const answerButton = document.getElementById('sendButton');
 const textBox = document.getElementById('formFile')
+const checker = document.getElementById('checkbutton')
 
 
-// 1. Setting up data channels
-console.log("Creating data channel")
-const sendChannel = pc.createDataChannel("sendChannel");
+// // 1. Setting up data channels
+// console.log("Creating data channel")
+// const dataChannel = pc.createDataChannel("sendChannel");
+
+// // 2. Setting up the data channel when opened
+// sendChannel.onopen = function(event) {
+//   var readyState = sendChannel.readyState;
+//   if (readyState == "open") {
+//     sendChannel.send("Hello");
+//   }
+// };
 
 
-// 2. Create an offer
+//setting up data channel new
+
+pc.ondatachannel = (event) => {
+  const rc = event.channel;
+  rc.onopen = () => {
+    rc.send("Hello");
+  };
 
 
 // 3. Answer the call with the unique ID
@@ -93,3 +108,6 @@ pc.addEventListener('connectionstatechange', event => {
       sendChannel.send("Hello , are we connected?")
   }
 });
+checker.onclick = async() =>{
+  sendChannel.send("Hello , are we connected?")
+}

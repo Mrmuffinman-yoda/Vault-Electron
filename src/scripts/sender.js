@@ -45,6 +45,10 @@ const file = document.getElementById("formFile");
 console.log("Creating data channel");
 const sendChannel = rc.createDataChannel("sendChannel");
 
+checker.onclick = async() =>{
+  sendChannel.send("Hello , are we connected?")
+}
+
 //Creating offer
 callButton.onclick = async() =>{
     //reference Firestore collections for signaling
