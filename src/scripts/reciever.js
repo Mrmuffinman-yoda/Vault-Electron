@@ -57,8 +57,14 @@ const checker = document.getElementById('checkbutton')
 
 peerConnection.ondatachannel = (event) => {
   const sendChannel = event.channel;
-  peerConnection.onopen = () => {
-    peerConnection.send("Hello");
+  sendChannel.onopen = () => {
+    sendChannel.send("Hello");
+  };
+  sendChannel.onmessage = (event) => {
+    console.log(event.data);
+  };
+  sendChannel.onclose = () => {
+    console.log("Channel closed");
   };
   peerConnection.channel = sendChannel;
 }
@@ -105,10 +111,10 @@ peerConnection.addEventListener('connectionstatechange', event => {
   console.log("Listening for connection")
   if (peerConnection.connectionState === 'connected') {
       console.log("Peers Connected")
-      console.log("Status:" + sendChannel.readyState)
-      sendChannel.send("Hello , are we connected?")
+      console.log("Status:" + peerConnection.connectionState)
   }
+// });
+// checker.onclick = async() =>{
+//   peerConnection.channel.send("Hello , are we connected?")
+// }
 });
-checker.onclick = async() =>{
-  peerConnection.channel.send("Hello , are we connected?")
-}
