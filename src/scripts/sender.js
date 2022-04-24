@@ -44,6 +44,21 @@ const file = document.getElementById("formFile");
 
 console.log("Creating data channel");
 const sendChannel = rc.createDataChannel("sendChannel");
+sendChannel.onopen = () => {
+  var readyState = sendChannel.readyState;
+  if (readyState == "open") {
+    sendChannel.send("Hello");
+  }
+  if(readyState == "closed"){
+    console.log("Channel closed")
+  }
+  if(readyState == "connecting"){
+    console.log("Channel connecting")
+  }
+  if(readyState == "closing"){
+    console.log("Channel closing")
+  }
+}
 
 //Creating offer
 callButton.onclick = async() =>{
@@ -96,7 +111,6 @@ rc.addEventListener('connectionstatechange', event => {
     if (rc.connectionState === 'connected') {
         console.log("Peers Connected")
         console.log("Status:" + sendChannel.readyState)
-        sendChannel.send("Hello , are we connected?")
     }
   });
 sendChannel.onmessage = (event) => {
