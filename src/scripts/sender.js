@@ -99,5 +99,8 @@ rc.addEventListener('connectionstatechange', event => {
         sendChannel.send("Hello , are we connected?")
     }
   });
-
+sendChannel.onmessage = (event) => {
+    console.log("Message received")
+    console.log(event.data)
+  }
 }

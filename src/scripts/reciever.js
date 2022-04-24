@@ -31,7 +31,7 @@ const servers = {
 };
 
 // Global State
-const pc = new RTCPeerConnection(servers);
+const peerConnection = new RTCPeerConnection(servers);
 
 // HTML elements
 console.log("HTML elements loaded")
@@ -42,7 +42,7 @@ const checker = document.getElementById('checkbutton')
 
 // // 1. Setting up data channels
 // console.log("Creating data channel")
-// const dataChannel = pc.createDataChannel("sendChannel");
+// const dataChannel = peerConnection.createDataChannel("sendChannel");
 
 // // 2. Setting up the data channel when opened
 // sendChannel.onopen = function(event) {
@@ -55,13 +55,13 @@ const checker = document.getElementById('checkbutton')
 
 //setting up data channel new
 
-pc.ondatachannel = (event) => {
-  const rc = event.channel;
-  rc.onopen = () => {
-    rc.send("Hello");
+peerConnection.ondatachannel = (event) => {
+  const sendChannel = event.channel;
+  peerConnection.onopen = () => {
+    peerConnection.send("Hello");
   };
+  peerConnection.channel = sendChannel;
 }
-
 
 // 3. Answer the call with the unique ID
 answerButton.onclick = async () => {
@@ -71,17 +71,17 @@ answerButton.onclick = async () => {
   const answerCandidates = callDoc.collection('answerCandidates');
   const offerCandidates = callDoc.collection('offerCandidates');
 
-  pc.onicecandidate = (event) => {
+  peerConnection.onicecandidate = (event) => {
     event.candidate && answerCandidates.add(event.candidate.toJSON());
   };
 
   const callData = (await callDoc.get()).data();
 
   const offerDescription = callData.offer;
-  await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+  await peerConnection.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-  const answerDescription = await pc.createAnswer();
-  await pc.setLocalDescription(answerDescription);
+  const answerDescription = await peerConnection.createAnswer();
+  await peerConnection.setLocalDescription(answerDescription);
 
   const answer = {
     type: answerDescription.type,
@@ -95,20 +95,20 @@ answerButton.onclick = async () => {
       console.log(change);
       if (change.type === 'added') {
         let data = change.doc.data();
-        pc.addIceCandidate(new RTCIceCandidate(data));
+        peerConnection.addIceCandidate(new RTCIceCandidate(data));
       }
     });
   });
 };
 // Listen for connectionstatechange on the local RTCPeerConnection
-pc.addEventListener('connectionstatechange', event => {
+peerConnection.addEventListener('connectionstatechange', event => {
   console.log("Listening for connection")
-  if (pc.connectionState === 'connected') {
+  if (peerConnection.connectionState === 'connected') {
       console.log("Peers Connected")
       console.log("Status:" + sendChannel.readyState)
       sendChannel.send("Hello , are we connected?")
   }
 });
 checker.onclick = async() =>{
-  sendChannel.send("Hello , are we connected?")
+  peerConnection.channel.send("Hello , are we connected?")
 }
