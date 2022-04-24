@@ -60,6 +60,7 @@ pc.ondatachannel = (event) => {
   rc.onopen = () => {
     rc.send("Hello");
   };
+}
 
 
 // 3. Answer the call with the unique ID
