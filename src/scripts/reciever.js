@@ -86,7 +86,7 @@ peerConnection.ondatachannel = (event) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'file.txt';
+        a.download = 'file.jrx';
         a.click();
         window.URL.revokeObjectURL(url);
         
@@ -100,8 +100,7 @@ peerConnection.ondatachannel = (event) => {
     console.log("Channel closed");
   };
   peerConnection.channel = sendChannel;
-}
-
+}  
 // 3. Answer the call with the unique ID
 answerButton.onclick = async () => {
   console.log("Answer Call")
