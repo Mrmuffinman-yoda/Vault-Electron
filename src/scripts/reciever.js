@@ -59,7 +59,7 @@ peerConnection.ondatachannel = (event) => {
   };
   const receivedbuffer = [];
   sendChannel.onmessage = (event) => {
-    const END_OF_FILE = 'EOF';
+    const END_OF_FILE = 300;
     // // download file from arraybuffer
     // const a = document.createElement('a');
     // const url = window.URL.createObjectURL(event);
@@ -81,8 +81,8 @@ peerConnection.ondatachannel = (event) => {
         receivedbuffer.push(data);
       }
       else{
-        if(data.startsWith("NAME")){
-            FILE_NAME = str.substring(4)
+        if(event.type === String){
+            FILE_NAME = str.substring(1)
             a.download = FILE_NAME;
             console.log("File name is : " + FILE_NAME)
           }
@@ -96,7 +96,7 @@ peerConnection.ondatachannel = (event) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        // a.download = FILE_NAME;
+        a.download = FILE_NAME;
         a.click();
         window.URL.revokeObjectURL(url);
         
