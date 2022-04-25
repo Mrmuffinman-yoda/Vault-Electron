@@ -72,8 +72,14 @@ peerConnection.ondatachannel = (event) => {
     const data = event.data;
     const FILE_NAME = event.data;
     try{
+      // if(data = "NAME"){
+      //   for(var i = 0; i < 2; i++){
+      //     FILE_NAME = data
+      //   }
+      // }
       if(data !== END_OF_FILE){
         receivedbuffer.push(data);
+         FILE_NAME = data;
       }
       else{
         const arrayBuffer = receivedbuffer.reduce((acc, curr) => {

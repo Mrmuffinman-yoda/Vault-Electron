@@ -43,7 +43,6 @@ const sendChannel = peerConnection.createDataChannel("sendChannel");
 sendChannel.onopen = () => {
   const filename = file.files[0].name;
   var readyState = sendChannel.readyState;
-  sendChannel.send(filename);
   if (readyState == "open") {
     // sendChannel.binaryType = "arraybuffer";
     // const filereader = new FileReader();
@@ -71,7 +70,8 @@ sendChannel.onopen = () => {
       const chunks = Math.ceil(byteArray.length / chunkSize);
       for (let i = 0; i < chunks; i++) {
         //wait if buffer is full
-        console.log((i/chunks)*100);
+        console.clear()
+        console.log(Math.round((i/chunks)*100) + "%");
         while (sendChannel.bufferedAmount > MAXIMUM_FILE_SIZE) {
           await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -83,6 +83,7 @@ sendChannel.onopen = () => {
         sendChannel.send(chunkArrayBuffer);
       }
       sendChannel.send(END_of_FILE);
+      sendChannel.send(filename);
     }
     
   }
