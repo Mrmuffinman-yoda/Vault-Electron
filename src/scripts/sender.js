@@ -59,6 +59,7 @@ sendChannel.onopen = () => {
 
     const file = document.getElementById("formFile").files[0];
     const fileReader = new FileReader(file);
+    fileReader.readAsArrayBuffer(file);
     fileReader.onload = async () => {
       const arrayBuffer = fileReader.result;
       const byteArray = new Uint8Array(arrayBuffer);
@@ -74,17 +75,7 @@ sendChannel.onopen = () => {
       }
       sendChannel.send(END_of_FILE);
     }
-
-
-
-
-
-
-
-
-
-
-
+    
   }
   if(readyState == "closed"){
     console.log("Channel closed")
