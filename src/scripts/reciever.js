@@ -54,9 +54,13 @@ const checker = document.getElementById('checkbutton')
 
 peerConnection.ondatachannel = (event) => {
   const sendChannel = event.channel;
+  sendChannel.binaryType = 'arraybuffer';
   sendChannel.onopen = () => {
   };
+  const receivedbuffer = [];
   sendChannel.onmessage = (event) => {
+    const END_OF_FILE = 'EOF';
+
     // // download file from arraybuffer
     // const a = document.createElement('a');
     // const url = window.URL.createObjectURL(event);
@@ -64,8 +68,33 @@ peerConnection.ondatachannel = (event) => {
     // a.download = 'file.txt';
     // a.click();
     // window.URL.revokeObjectURL(url);
-    console.log(event.data)
 
+    // // download file from blob
+    const data = event.data;
+    try{
+      if(data !== END_OF_FILE){
+        receivedbuffer.push(data);
+      }
+      else{
+        const arrayBuffer = receivedbuffer.reduce((acc, curr) => {
+          const tmp = new Uint8Array(acc.byteLength + curr.byteLength);
+          tmp.set(new Uint8Array(acc), 0);
+          tmp.set(new Uint8Array(curr), acc.byteLength);
+          return tmp.buffer;
+        }, new ArrayBuffer(0));
+        const blob = new Blob([arrayBuffer], {type: 'application/octet-stream'});
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'file.txt';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+      }
+    }catch(err){
+      console.log(err)
+    }
+    console.log(event.data)
   };
   sendChannel.onclose = () => {
     console.log("Channel closed");
