@@ -60,7 +60,6 @@ peerConnection.ondatachannel = (event) => {
   const receivedbuffer = [];
   sendChannel.onmessage = (event) => {
     const END_OF_FILE = 'EOF';
-
     // // download file from arraybuffer
     // const a = document.createElement('a');
     // const url = window.URL.createObjectURL(event);
@@ -71,6 +70,7 @@ peerConnection.ondatachannel = (event) => {
 
     // // download file from blob
     const data = event.data;
+    const FILE_NAME = event.data;
     try{
       if(data !== END_OF_FILE){
         receivedbuffer.push(data);
@@ -86,7 +86,7 @@ peerConnection.ondatachannel = (event) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'file.jrx';
+        a.download = FILE_NAME;
         a.click();
         window.URL.revokeObjectURL(url);
         
