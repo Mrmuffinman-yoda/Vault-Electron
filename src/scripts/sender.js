@@ -1,3 +1,5 @@
+const { times } = require("lodash");
+
 //firebase API key
 const firebaseConfig = {
   apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
@@ -39,7 +41,10 @@ const sendChannel = peerConnection.createDataChannel("sendChannel");
 
 
 sendChannel.onopen = () => {
+  const filename = file.files[0].name;
   var readyState = sendChannel.readyState;
+  sendChannel.send("filetype : " + filename.split(".").pop());
+  sendChannel.send(filename)
   if (readyState == "open") {
     // sendChannel.binaryType = "arraybuffer";
     // const filereader = new FileReader();
@@ -54,7 +59,7 @@ sendChannel.onopen = () => {
     // //   const arraybuffer = await file.arrayBuffer();
     // //   sendChannel.send(arraybuffer);
 
-    const MAXIMUM_FILE_SIZE = 65535;
+    const MAXIMUM_FILE_SIZE = 64000;
     const END_of_FILE = "EOF";
 
     const file = document.getElementById("formFile").files[0];
@@ -66,6 +71,11 @@ sendChannel.onopen = () => {
       const chunkSize = MAXIMUM_FILE_SIZE;
       const chunks = Math.ceil(byteArray.length / chunkSize);
       for (let i = 0; i < chunks; i++) {
+        //wait if buffer is full
+        console.log((i/chunks)*100);
+        while (sendChannel.bufferedAmount > MAXIMUM_FILE_SIZE) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
         const start = i * chunkSize;
         const end = start + chunkSize;
         const chunk = byteArray.slice(start, end);
@@ -87,7 +97,6 @@ sendChannel.onopen = () => {
     console.log("Channel closing")
   }
 }
-
 //Creating offer
 callButton.onclick = async() =>{
     //reference Firestore collections for signaling
