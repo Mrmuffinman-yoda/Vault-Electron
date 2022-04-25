@@ -108,8 +108,5 @@ peerConnection.addEventListener('connectionstatechange', event => {
   if (peerConnection.connectionState === 'connected') {
       console.log("[STATUS]:" + peerConnection.connectionState)
   }
-// });
-// checker.onclick = async() =>{
-//   peerConnection.channel.send("Hello , are we connected?")
-// }
 });
+//recieve file from sender
