@@ -43,8 +43,7 @@ const sendChannel = peerConnection.createDataChannel("sendChannel");
 sendChannel.onopen = () => {
   const filename = file.files[0].name;
   var readyState = sendChannel.readyState;
-  sendChannel.send("NAME");
-  sendChannel.send(filename);
+  sendChannel.send("NAME"+filename);
   if (readyState == "open") {
     // sendChannel.binaryType = "arraybuffer";
     // const filereader = new FileReader();

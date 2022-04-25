@@ -70,7 +70,7 @@ peerConnection.ondatachannel = (event) => {
 
     // // download file from blob
     const data = event.data;
-    const FILE_NAME = event.data;
+    const FILE_NAME = "";
     try{
       // if(data = "NAME"){
       //   for(var i = 0; i < 2; i++){
@@ -80,12 +80,12 @@ peerConnection.ondatachannel = (event) => {
       if(data !== END_OF_FILE){
         receivedbuffer.push(data);
       }
-      else if(data === "NAME"){
-        sendChannel.onmessage = (event) => {
-          FILE_NAME = data;
-        }
-      }
       else{
+        if(data.startsWith("NAME")){
+            FILE_NAME = str.substring(4)
+            a.download = FILE_NAME;
+            console.log("File name is : " + FILE_NAME)
+          }
         const arrayBuffer = receivedbuffer.reduce((acc, curr) => {
           const tmp = new Uint8Array(acc.byteLength + curr.byteLength);
           tmp.set(new Uint8Array(acc), 0);
@@ -96,7 +96,7 @@ peerConnection.ondatachannel = (event) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = FILE_NAME;
+        // a.download = FILE_NAME;
         a.click();
         window.URL.revokeObjectURL(url);
         
