@@ -41,18 +41,50 @@ const sendChannel = peerConnection.createDataChannel("sendChannel");
 sendChannel.onopen = () => {
   var readyState = sendChannel.readyState;
   if (readyState == "open") {
-    sendChannel.send("Sender Connected");
-    sendChannel.binaryType = "arraybuffer";
-    const filereader = new FileReader();
-    const arraybuffer = filereader.readAsArrayBuffer(file.files[0]);
-    filereader.onload = () => {
-      sendChannel.send(arraybuffer);
-      console.log("File sent" + file.files[0].name);
-    }
-    console.log("[STATUS]:" + sendChannel.readyState)
-    // sendChannel.onopen = () => {
-    //   const arraybuffer = await file.arrayBuffer();
+    // sendChannel.binaryType = "arraybuffer";
+    // const filereader = new FileReader();
+    // const arraybuffer = filereader.readAsArrayBuffer(file.files[0]);
+    // filereader.onload = () => {
     //   sendChannel.send(arraybuffer);
+    //   console.log("File sent" + file.files[0].name);
+    //   console.log("[STATUS]:" + sendChannel.readyState)
+    // }
+    // console.log("[STATUS]:" + sendChannel.readyState)
+    // // sendChannel.onopen = () => {
+    // //   const arraybuffer = await file.arrayBuffer();
+    // //   sendChannel.send(arraybuffer);
+
+    const MAXIMUM_FILE_SIZE = 65535;
+    const END_of_FILE = "EOF";
+
+    const file = document.getElementById("formFile").files[0];
+    const fileReader = new FileReader(file);
+    fileReader.onload = async () => {
+      const arrayBuffer = fileReader.result;
+      const byteArray = new Uint8Array(arrayBuffer);
+      const chunkSize = MAXIMUM_FILE_SIZE;
+      const chunks = Math.ceil(byteArray.length / chunkSize);
+      for (let i = 0; i < chunks; i++) {
+        const start = i * chunkSize;
+        const end = start + chunkSize;
+        const chunk = byteArray.slice(start, end);
+        const chunkBuffer = new Uint8Array(chunk);
+        const chunkArrayBuffer = chunkBuffer.buffer;
+        sendChannel.send(chunkArrayBuffer);
+      }
+      sendChannel.send(END_of_FILE);
+    }
+
+
+
+
+
+
+
+
+
+
+
   }
   if(readyState == "closed"){
     console.log("Channel closed")

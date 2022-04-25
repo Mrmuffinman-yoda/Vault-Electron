@@ -55,10 +55,17 @@ const checker = document.getElementById('checkbutton')
 peerConnection.ondatachannel = (event) => {
   const sendChannel = event.channel;
   sendChannel.onopen = () => {
-    sendChannel.send("Hello");
   };
   sendChannel.onmessage = (event) => {
-    console.log(event.data);
+    // // download file from arraybuffer
+    // const a = document.createElement('a');
+    // const url = window.URL.createObjectURL(event);
+    // a.href = url;
+    // a.download = 'file.txt';
+    // a.click();
+    // window.URL.revokeObjectURL(url);
+    console.log(event.data)
+
   };
   sendChannel.onclose = () => {
     console.log("Channel closed");
@@ -110,3 +117,19 @@ peerConnection.addEventListener('connectionstatechange', event => {
   }
 });
 //recieve file from sender
+// peerConnection.ondatachannel = (event) => {
+//   const sendChannel = event.channel;
+//   sendChannel.binaryType = "arraybuffer";
+
+//   sendChannel.onmessage= (event) => {
+//     const data = event.data;
+//     try{
+//       const blob = new Blob([data]);
+//       downloadFile(blob, sendChannel.label);
+//       sendChannel.close();
+//     }
+//     catch(error){
+//       console.log(error + "Error in sending file");
+//     }
+//   }
+// }
