@@ -5,6 +5,7 @@
 //import firebase from './firebase/app';
 //import './firebase/firestore';
 //firebase API key
+var cryptojs = require("crypto-js");
 const firebaseConfig = {
   apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
   authDomain: "vaultv3-3474c.firebaseapp.com",
@@ -99,7 +100,8 @@ peerConnection.ondatachannel = (event) => {
         a.download = FILE_NAME;
         a.click();
         window.URL.revokeObjectURL(url);
-        
+        const hash = cryptojs.MD5(arrayBuffer);
+        console.log("Hash: " + hash);
       }
     }catch(err){
       console.log(err)

@@ -1,5 +1,5 @@
 const { times } = require("lodash");
-
+var cryptojs = require("crypto-js");
 //firebase API key
 const firebaseConfig = {
   apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
@@ -83,9 +83,9 @@ sendChannel.onopen = () => {
         const chunkArrayBuffer = chunkBuffer.buffer;
         sendChannel.send(chunkArrayBuffer);
       }
-      //create checksum of file
-      const checksum = await sha256(arrayBuffer);
-      print("Checksum: " + checksum);
+      //take a hash of file
+      const hash = cryptojs.MD5(arrayBuffer);
+      console.log("Hash: " + hash);
       sendChannel.send(END_of_FILE);
     }
     
