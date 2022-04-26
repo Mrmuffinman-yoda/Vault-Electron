@@ -59,7 +59,7 @@ peerConnection.ondatachannel = (event) => {
   };
   const receivedbuffer = [];
   sendChannel.onmessage = (event) => {
-    const END_OF_FILE = 300;
+    const END_OF_FILE = 'EOF';
     // // download file from arraybuffer
     // const a = document.createElement('a');
     // const url = window.URL.createObjectURL(event);

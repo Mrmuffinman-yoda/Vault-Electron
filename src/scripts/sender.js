@@ -59,7 +59,7 @@ sendChannel.onopen = () => {
     // //   sendChannel.send(arraybuffer);
 
     const MAXIMUM_FILE_SIZE = 64000;
-    const END_of_FILE = 300;
+    const END_of_FILE = "EOF";
 
     const file = document.getElementById("formFile").files[0];
     const fileReader = new FileReader(file);
