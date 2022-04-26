@@ -35,18 +35,18 @@ function createWindow () {
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 }
-var menu = Menu.buildFromTemplate([
-  {
-    label: 'File',
-    submenu: [
-      {
-        label: 'Change Window Size',
-        click: function() {
-          console.log("suprise");
-        }
-      }]
-  }
-]);
+// var menu = Menu.buildFromTemplate([
+//   {
+//     label: 'File',
+//     submenu: [
+//       {
+//         label: 'Change Window Size',
+//         click: function() {
+//           console.log("suprise");
+//         }
+//       }]
+//   }
+// ]);
 
 
 ipcMain.on('sendUsername', (event, arg) => {
@@ -57,7 +57,7 @@ ipcMain.on('sendUsername', (event, arg) => {
 });
 
 
-Menu.setApplicationMenu(menu);
+// Menu.setApplicationMenu(menu);
 ipcMain.on('username', (event, arg) => { 
   var userFolder = app.getPath('userData') + "/" + "users";
   console.log(arg);

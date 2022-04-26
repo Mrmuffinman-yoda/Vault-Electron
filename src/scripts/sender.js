@@ -83,6 +83,9 @@ sendChannel.onopen = () => {
         const chunkArrayBuffer = chunkBuffer.buffer;
         sendChannel.send(chunkArrayBuffer);
       }
+      //create checksum of file
+      const checksum = await sha256(arrayBuffer);
+      print("Checksum: " + checksum);
       sendChannel.send(END_of_FILE);
     }
     
