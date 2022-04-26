@@ -11,7 +11,7 @@ function createWindow () {
       contextIsolation: false,
       enableRemoteModule: true,
       webSecurity: false,
-      icon: "v.png",
+      icon:'./src/logo.ico',
       preload: path.join(__dirname, 'preload.js'),
     }
   })
@@ -67,22 +67,21 @@ ipcMain.on('username', (event, arg) => {
     console.log("folder exists");
   } 
   else{
-      fs.mkdir(app.getPath('userData') + "/" + "users", { recursive: true }, (err) => {
-      
-      if (err) {
-                console.log(err);} 
-      else {
-            console.log('Directory created successfully');
-        }
-        //write username into file
-        fs.writeFile(app.getPath('userData') + "/" + "users" +"/" + "/" + "username.txt", arg, function(err) {
-          if(err) {
-              return console.log(err);
-          }
-          console.log("The file was saved!");
-        });
-      });
-    }});
+    fs.mkdir(app.getPath('userData') + "/" + "users", { recursive: true }, (err) => {      
+    if (err) {
+      console.log(err);} 
+    else {
+      console.log('Directory created successfully');
+    }
+    //write username into file
+    fs.writeFile(app.getPath('userData') + "/" + "users" +"/" + "/" + "username.txt", arg, function(err) {
+    if(err) {
+      return console.log(err);
+    }
+    console.log("The file was saved!");
+    });
+  });
+}});
 // read username from file and save it to global variable
 ipcMain.on('readUsername', (event, arg) => {
   var userFolder = app.getPath('userData') + "/" + "users";

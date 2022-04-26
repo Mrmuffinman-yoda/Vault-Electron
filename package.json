@@ -32,5 +32,11 @@
     "lodash": "^4.17.21",
     "simple-file-writer": "^2.0.0",
     "uniq": "^1.0.1"
+  },
+  "directories": {
+    "buildResources": "src"
+  },
+  "win": {
+    "icon": ".src/logo.ico"
   }
 }
