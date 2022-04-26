@@ -1,12 +1,22 @@
 //javascript file for selecting usernames
+const { app,ipcRenderer } = require('electron');
+var submitUsername = document.getElementById("submitUsername");// button to submit username
 //If username file exists then ignore this and continue with program
 window.onload = function(){
-    const username = document.getElementsByClassName("username").value;
-    const submitUsername = document.getElementById("submitUsername");
-    var SimpleFileWriter = require('simple-file-writer');
-
-    submitUsername.onclick = function(){
-        console.log("Warning : Yet to complete")
-        console.log(username)
-    }
+    //blank for now
+    console.warn("onload")
 }
+submitUsername.onclick = function(){
+    //get username input
+    var username = document.getElementById("username").value;
+    const NOTIFICATION_TITLE= "Username";
+    const NOTIFICATION_MESSAGE = "Username is set to " + username;
+    const CLICK_MESSAGE = "NOTIFICATION CLICKED";
+    //check if username is empty
+    if(username == ""){
+        alert("Username cannot be empty");
+        return;
+    }
+    ipcRenderer.send('username', username);
+    new Notification(NOTIFICATION_TITLE, { body: NOTIFICATION_MESSAGE, silent: false });
+}   

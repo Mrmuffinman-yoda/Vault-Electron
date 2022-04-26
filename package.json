@@ -29,7 +29,6 @@
     "browserify": "^17.0.0",
     "custom-electron-titlebar": "^4.1.0",
     "firebase": "^9.6.9",
-    "jquery": "^3.6.0",
     "lodash": "^4.17.21",
     "simple-file-writer": "^2.0.0",
     "uniq": "^1.0.1"

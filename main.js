@@ -1,26 +1,146 @@
-
-const {app, BrowserWindow} = require('electron')
-const path = require('path')
+const {app, BrowserWindow, Menu , ipcMain} = require('electron')
+const fs = require('fs');
+const path = require('path');
 function createWindow () {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({ 
     width: 800,
-    height: 600,
+    height: 800,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,
+      webSecurity: false,
       icon: "v.png",
       preload: path.join(__dirname, 'preload.js'),
     }
   })
-  
+  var userFolder = app.getPath('userData') + "/" + "users";
+  //Open dev tools on load
+  mainWindow.webContents.openDevTools()
+
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  // if folder exists then load homepage.html
+
+  if(fs.existsSync(userFolder)) {
+    mainWindow.loadFile('./src/pages/homepage.html')
+    console.log("User folder exists")
+    console.log("Opening homepage")
+    // transmit username to homepage
+  }
+  else{
+    mainWindow.loadFile('index.html')
+    console.log("User folder does not exist")
+  }
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 }
+var menu = Menu.buildFromTemplate([
+  {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Change Window Size',
+        click: function() {
+          console.log("suprise");
+        }
+      }]
+  }
+]);
 
+
+ipcMain.on('sendUsername', (event, arg) => {
+  //read username and save to username variable
+  var username = fs.readFileSync(app.getPath('userData') + "/" + "users" +"/" + "username.txt", 'utf8');
+  console.log("Sending username to main process")
+  event.sender.send('readUsername', username);
+});
+
+
+Menu.setApplicationMenu(menu);
+ipcMain.on('username', (event, arg) => { 
+  var userFolder = app.getPath('userData') + "/" + "users";
+  console.log(arg);
+  console.log(app.getPath('userData'));
+  //if folder exists,dont make a new one
+  if(fs.existsSync(userFolder)){
+    console.log("folder exists");
+  } 
+  else{
+      fs.mkdir(app.getPath('userData') + "/" + "users", { recursive: true }, (err) => {
+      
+      if (err) {
+                console.log(err);} 
+      else {
+            console.log('Directory created successfully');
+        }
+        //write username into file
+        fs.writeFile(app.getPath('userData') + "/" + "users" +"/" + "/" + "username.txt", arg, function(err) {
+          if(err) {
+              return console.log(err);
+          }
+          console.log("The file was saved!");
+        });
+      });
+    }});
+// read username from file and save it to global variable
+ipcMain.on('readUsername', (event, arg) => {
+  var userFolder = app.getPath('userData') + "/" + "users";
+  var username = fs.readFileSync(app.getPath('userData') + "/" + "users" +"/" + "username.txt", 'utf8');
+  console.log(username);
+  event.sender.send('username', username);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
