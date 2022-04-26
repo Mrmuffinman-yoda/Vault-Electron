@@ -4,7 +4,7 @@ const path = require('path');
 function createWindow () {
   // Create the browser window.
   const mainWindow = new BrowserWindow({ 
-    width: 800,
+    width: 1000,
     height: 800,
     webPreferences: {
       nodeIntegration: true,
@@ -17,7 +17,7 @@ function createWindow () {
   })
   var userFolder = app.getPath('userData') + "/" + "users";
   //Open dev tools on load
-  mainWindow.webContents.openDevTools()
+  //mainWindow.webContents.openDevTools()
 
   // and load the index.html of the app.
   // if folder exists then load homepage.html

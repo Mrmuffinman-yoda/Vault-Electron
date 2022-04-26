@@ -4,11 +4,12 @@ const { app,ipcRenderer } = require('electron');
 window.onload = function(){
     //ask main process to read username
     ipcRenderer.send('sendUsername');
-    // console.log(username);
+    
     }
 
 ipcRenderer.on('readUsername', (event, arg) => {
     username = arg;
+    document.getElementById("userWelcome").innerHTML = "Welcome back " + username + "!";
     console.log(username);
 });
 
