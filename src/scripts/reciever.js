@@ -6,6 +6,8 @@
 //import './firebase/firestore';
 //firebase API key
 var cryptojs = require("crypto-js");
+const { app }= require('electron');
+const { ipcRenderer } = require('electron');
 const firebaseConfig = {
   apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
   authDomain: "vaultv3-3474c.firebaseapp.com",
@@ -52,9 +54,11 @@ const checker = document.getElementById('checkbutton')
 
 
 //setting up data channel new
-
 peerConnection.ondatachannel = (event) => {
   const sendChannel = event.channel;
+  if(FILE_NAME == undefined){
+    var FILE_NAME = "";
+  }
   sendChannel.binaryType = 'arraybuffer';
   sendChannel.onopen = () => {
   };
@@ -71,22 +75,24 @@ peerConnection.ondatachannel = (event) => {
 
     // // download file from blob
     const data = event.data;
-    const FILE_NAME = "";
     try{
       // if(data = "NAME"){
       //   for(var i = 0; i < 2; i++){
       //     FILE_NAME = data
       //   }
       // }
+      if (typeof data !== "object"&&data!==END_OF_FILE) {
+        if (data.substring(0, 4) === "NAME") {
+          // remove first 4 letters from data
+          FILE_NAME = data.substring(4, data.length)
+        } 
+      }
       if(data !== END_OF_FILE){
+        
         receivedbuffer.push(data);
       }
       else{
-        if(event.type === String){
-            FILE_NAME = str.substring(1)
-            a.download = FILE_NAME;
-            console.log("File name is : " + FILE_NAME)
-          }
+        //Finished recieving file
         const arrayBuffer = receivedbuffer.reduce((acc, curr) => {
           const tmp = new Uint8Array(acc.byteLength + curr.byteLength);
           tmp.set(new Uint8Array(acc), 0);
@@ -96,23 +102,34 @@ peerConnection.ondatachannel = (event) => {
         const blob = new Blob([arrayBuffer], {type: 'application/octet-stream'});
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = FILE_NAME;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        const hash = cryptojs.MD5(arrayBuffer);
-        console.log("Hash: " + hash);
+        //send file name to main.js
+        var fileValues = [FILE_NAME, url,blob,a]
+        //send fileValues to main.js
+        ipcRenderer.send('fileValues', fileValues);
+
+        // a.href = url;
+        // console.log("File name is : " + FILE_NAME)
+        // a.download = FILE_NAME;
+        // a.click();
+        // window.URL.revokeObjectURL(url);
+        // const hash = cryptojs.MD5(blob);
+        // console.log("Hash: " + hash);
       }
     }catch(err){
       console.log(err)
     }
-    console.log(event.data)
+    // console.log(event.data)
   };
   sendChannel.onclose = () => {
     console.log("Channel closed");
   };
   peerConnection.channel = sendChannel;
-}  
+}
+function slicer(data) {
+  const slicedData = data.slice(4);
+  return slicedData;
+}
+  
 // 3. Answer the call with the unique ID
 answerButton.onclick = async () => {
   console.log("Answer Call")
@@ -173,3 +190,5 @@ peerConnection.addEventListener('connectionstatechange', event => {
 //     }
 //   }
 // }
+//#endregion
+

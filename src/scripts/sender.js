@@ -44,6 +44,7 @@ sendChannel.onopen = () => {
   const filename = file.files[0].name;
   var readyState = sendChannel.readyState;
   sendChannel.send("NAME"+filename);
+  document.getElementById("fileName").innerHTML = "Filename: " + filename;
   if (readyState == "open") {
     // sendChannel.binaryType = "arraybuffer";
     // const filereader = new FileReader();
@@ -73,6 +74,8 @@ sendChannel.onopen = () => {
         //wait if buffer is full
         console.clear()
         console.log(Math.round((i/chunks)*100) + "%");
+        document.getElementById("progressBar").innerHTML = "Progress: " + Math.round((i/chunks)*100) + "%";
+
         while (sendChannel.bufferedAmount > MAXIMUM_FILE_SIZE) {
           await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -86,6 +89,7 @@ sendChannel.onopen = () => {
       //take a hash of file
       const hash = cryptojs.MD5(arrayBuffer);
       console.log("Hash: " + hash);
+      document.getElementById("progressBar").innerHTML = "Progress: " + "100"+ "%";
       sendChannel.send(END_of_FILE);
     }
     
@@ -153,6 +157,11 @@ sendChannel.onmessage = (event) => {
     console.log("Message received: " + event.data);
   }
 }
+
+//create for loop and send message to other use
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-const {app, BrowserWindow, Menu , ipcMain} = require('electron')
+const {app, BrowserWindow, Menu , ipcMain, ipcRenderer} = require('electron')
 const fs = require('fs');
 const path = require('path');
 function createWindow () {
@@ -16,6 +16,12 @@ function createWindow () {
     }
   })
   var userFolder = app.getPath('userData') + "/" + "users";
+  //when render process sends a message to main process return the user data location
+  ipcMain.on('userDataLocation', (event, arg) => {
+    userFolder = arg;
+    ipcMain.emit('userDataLocation', userFolder);
+  });
+
   //Open dev tools on load
   //mainWindow.webContents.openDevTools()
 
