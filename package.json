@@ -1,21 +1,21 @@
 {
   "name": "vault",
-  "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "version": "1.5.0",
+  "description": "Seamless backup without a server",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "build": "webpack"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
+  "repository": "https://github.com/Mrmuffinman-yoda/Vault-Electron",
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "Backup",
+    "Vault",
+    "Serverless",
+    "Quick",
+    "Seamless"
   ],
-  "author": "GitHub",
+  "author": "mrmuffinman-yoda",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^17.1.2",
