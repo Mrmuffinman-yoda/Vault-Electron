@@ -9,9 +9,8 @@ window.onload = function(){
 submitUsername.onclick = function(){
     //get username input
     var username = document.getElementById("username").value;
-    const NOTIFICATION_TITLE= "Username";
+    const NOTIFICATION_TITLE= "Username has been set";
     const NOTIFICATION_MESSAGE = "Username is set to " + username;
-    const CLICK_MESSAGE = "NOTIFICATION CLICKED";
     //check if username is empty
     if(username == ""){
         alert("Username cannot be empty");

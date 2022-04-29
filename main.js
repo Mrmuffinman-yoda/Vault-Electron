@@ -32,11 +32,17 @@ function createWindow () {
     mainWindow.loadFile('./src/pages/homepage.html')
     console.log("User folder exists")
     console.log("Opening homepage")
+    
     // transmit username to homepage
   }
   else{
     mainWindow.loadFile('index.html')
     console.log("User folder does not exist")
+    var USER_FOLDER = app.getPath('userData') + "/" + "users";
+    var GROUP_ID = "";
+    var USER_NAME = "";
+    var ALLOCATED_SIDE = "";
+    var GROUP = false;
   }
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -55,6 +61,35 @@ function createWindow () {
 // ]);
 
 
+//Users constants
+var USER_FOLDER = app.getPath('userData') + "/" + "users";
+var GROUP_ID = "052afCQj00rDQQj0MJ9b";
+var USER_NAME = "";
+var ALLOCATED_SIZE = "";
+var GROUP = false;
+
+ipcMain.on("username", (event, arg) => {
+  USER_NAME = arg;
+  console.log("Username: " + USER_NAME);
+});
+
+ipcMain.on("groupID", (event, arg) => {
+  GROUP_ID = arg;
+  console.log("Group ID: " + GROUP_ID);
+});
+
+ipcMain.on("allocatedSide", (event, arg) => {
+  ALLOCATED_SIZE = arg;
+  console.log("Allocated Size: " + ALLOCATED_SIZE);
+});
+
+ipcMain.on("group", (event, arg) => {
+  GROUP = arg;
+  console.log("Group: " + GROUP);
+});
+
+
+// Send user name
 ipcMain.on('sendUsername', (event, arg) => {
   //read username and save to username variable
   var username = fs.readFileSync(app.getPath('userData') + "/" + "users" +"/" + "username.txt", 'utf8');
@@ -62,32 +97,32 @@ ipcMain.on('sendUsername', (event, arg) => {
   event.sender.send('readUsername', username);
 });
 
-
+// Writing username to file
 // Menu.setApplicationMenu(menu);
-ipcMain.on('username', (event, arg) => { 
-  var userFolder = app.getPath('userData') + "/" + "users";
-  console.log(arg);
-  console.log(app.getPath('userData'));
-  //if folder exists,dont make a new one
-  if(fs.existsSync(userFolder)){
-    console.log("folder exists");
-  } 
-  else{
-    fs.mkdir(app.getPath('userData') + "/" + "users", { recursive: true }, (err) => {      
-    if (err) {
-      console.log(err);} 
-    else {
-      console.log('Directory created successfully');
-    }
-    //write username into file
-    fs.writeFile(app.getPath('userData') + "/" + "users" +"/" + "/" + "username.txt", arg, function(err) {
-    if(err) {
-      return console.log(err);
-    }
-    console.log("The file was saved!");
-    });
-  });
-}});
+// ipcMain.on('username', (event, arg) => { 
+//   var userFolder = app.getPath('userData') + "/" + "users";
+//   console.log(arg);
+//   console.log(app.getPath('userData'));
+//   //if folder exists,dont make a new one
+//   if(fs.existsSync(userFolder)){
+//     console.log("folder exists");
+//   } 
+//   else{
+//     fs.mkdir(app.getPath('userData') + "/" + "users", { recursive: true }, (err) => {      
+//     if (err) {
+//       console.log(err);} 
+//     else {
+//       console.log('Directory created successfully');
+//     }
+//     //write username into file
+//     fs.writeFile(app.getPath('userData') + "/" + "users" +"/" + "/" + "username.txt", arg, function(err) {
+//     if(err) {
+//       return console.log(err);
+//     }
+//     console.log("The file was saved!");
+//     });
+//   });
+// }});
 // read username from file and save it to global variable
 ipcMain.on('readUsername', (event, arg) => {
   var userFolder = app.getPath('userData') + "/" + "users";
