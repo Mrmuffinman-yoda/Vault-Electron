@@ -103,17 +103,14 @@ peerConnection.ondatachannel = (event) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         //send file name to main.js
-        var fileValues = [FILE_NAME, url,blob,a]
-        //send fileValues to main.js
-        ipcRenderer.send('fileValues', fileValues);
 
-        // a.href = url;
-        // console.log("File name is : " + FILE_NAME)
-        // a.download = FILE_NAME;
-        // a.click();
-        // window.URL.revokeObjectURL(url);
-        // const hash = cryptojs.MD5(blob);
-        // console.log("Hash: " + hash);
+        a.href = url;
+        console.log("File name is : " + FILE_NAME)
+        a.download = FILE_NAME;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        const hash = cryptojs.MD5(blob);
+        console.log("Hash: " + hash);
       }
     }catch(err){
       console.log(err)
@@ -129,7 +126,6 @@ function slicer(data) {
   const slicedData = data.slice(4);
   return slicedData;
 }
-
 var groupID = "adefdf4wsefsf32"
 var pairID = "124eeaf4wsgs4gwe2";
 // 3. Answer the call with the unique ID

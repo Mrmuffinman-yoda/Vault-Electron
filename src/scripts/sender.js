@@ -86,8 +86,8 @@ sendChannel.onopen = () => {
         sendChannel.send(chunkArrayBuffer);
       }
       //take a hash of file
-      const hash = cryptojs.MD5(arrayBuffer);
-      console.log("Hash: " + hash);
+      // const hash = cryptojs.MD5(arrayBuffer);
+      // console.log("Hash: " + hash);
       document.getElementById("progressBar").innerHTML = "Progress: " + "100"+ "%";
       sendChannel.send(END_of_FILE);
     }
@@ -110,7 +110,7 @@ var pairID = "124eeaf4wsgs4gwe2";
 //Creating offer
 callButton.onclick = async() =>{
     //reference Firestore collections for signaling
-    const groupRef = firestore.collection("groups").doc(groupID);
+    const groupRef = firestore.collection(groupID);
     const pairRef = groupRef.collection("pairs").doc(pairID);
     const offerCandidates = pairRef.collection("offerCandidates");
     const answerCandidates = pairRef.collection("answerCandidates");
@@ -161,46 +161,3 @@ sendChannel.onmessage = (event) => {
     console.log("Message received: " + event.data);
   }
 }
-
-//create for loop and send message to other use
-
-
-
-
-
-
-//send file
-// sendButton.onclick = async() =>{
-//     console.log("Sending file")
-//     const file = document.getElementById("formFile").files[0];
-//     const fileReader = new FileReader();
-//     fileReader.onload = async() =>{
-//         const fileData = fileReader.result;
-//         const fileName = file.name;
-//         const fileType = file.type;
-//         const fileSize = file.size;
-//         const fileBlob = new Blob([fileData], {type: fileType});
-//         const fileRef = firestore.collection("files").doc();
-//         const fileId = fileRef.id;
-//         const fileDoc = firestore.collection("files").doc(fileId);
-//         await fileDoc.set({
-//             fileName,
-//             fileType,
-//             fileSize,
-//             fileBlob,
-//         });
-//         const fileUrl = await fileRef.get().then(doc => {
-//             if (!doc.exists) {
-//                 console.log("No such document!");
-//             } else {
-//                 console.log("Document data:", doc.data());
-//                 return doc.data().fileBlob;
-//             }
-//         }).catch(err => {
-//             console.log("Error getting document", err);
-//         });
-//         console.log("File url:" + fileUrl)
-//         sendChannel.send(fileUrl);
-//     }
-//     fileReader.readAsArrayBuffer(file);
-// }

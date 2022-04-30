@@ -2,7 +2,62 @@ const {app, BrowserWindow, Menu , ipcMain, ipcRenderer} = require('electron')
 const fs = require('fs');
 const path = require('path');
 var cryptojs = require("crypto-js");
+const ClientId = "970034993361473546";
+const DiscordRPC = require("discord-rpc");
+const RPC = new DiscordRPC.Client({ transport: 'ipc' });
+DiscordRPC.register(ClientId);
 
+function setActivity() {
+  if (!RPC) return;
+  RPC.setActivity({
+    details: "Vault",
+    state: "Ready for backups",
+    startTimestamp: new Date(),
+    largeImageKey: "vaultlogo",
+    largeImageText: "Vault",
+    smallImageKey: "vaultsmall",
+    smallImageText: "Vault",
+    instance: false,
+    buttons:[
+        {
+          label: "Github",
+          url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          // url: "https://github.com/Mrmuffinman-yoda/Vault-Electron"
+        }
+      ]
+  });
+}
+RPC.on("ready", () => {
+  console.log("ready");
+  setActivity();
+  setInterval(() => {
+    setActivity();
+  }, 60000);
+});
+
+RPC.login({ clientId: ClientId });
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.whenReady().then(() => {
+  createWindow()
+
+  app.on('activate', function () {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
+})
+
+// Quit when all windows are closed, except on macOS. There, it's common
+// for applications and their menu bar to stay active until the user quits
+// explicitly with Cmd + Q.
+app.on('window-all-closed', function () {
+  if (process.platform !== 'darwin') app.quit()
+})
+
+// In this file you can include the rest of your app's specific main process
+// code. You can also put them in separate files and require them here.
 //firebase API key can be changed by editing the file if required
 var firebaseConfig = {
   apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
@@ -34,6 +89,7 @@ function createWindow () {
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,
+      autoHideMenuBar: true,
       webSecurity: false,
       icon:'./src/logo.ico',
       preload: path.join(__dirname, 'preload.js'),
@@ -118,11 +174,11 @@ var GROUP_ID = "052afCQj00rDQQj0MJ9b";
 var USER_NAME = "";
 var ALLOCATED_SIZE = "";
 var GROUP = false;
-var leader = false;
-var users = {
-  "users": [],
-  "connections": [],
-  "leader": []
+var LEADER = false;
+var USERS = {
+  "USERS": [],
+  "CONNECTIONS": [],
+  "LEADER": []
 };
 
 readUserfiles();
@@ -151,6 +207,18 @@ ipcMain.on("GETCONFIG", (event, arg) => {
   event.sender.send("CONFIG", firebaseConfig);
 });
 
+ipcMain.on("GETGROUPID", (event, arg) => {
+  event.sender.send("GROUPID", GROUP_ID);
+});
+ipcMain.on("GETCONNECTIONID", (event, arg) => {
+  event.sender.send("CONNECTIONID", "cfe2r2fasdf4");
+});
+ipcMain.on("code", (event, arg) => {
+  GROUP_ID = arg;
+  LEADER = true;
+  console.log("leader: " + LEADER);
+  console.log("Group ID: " + GROUP_ID);
+});
 
 // finish of setup
 ipcMain.on("finish", (event, arg) => {
@@ -161,7 +229,7 @@ ipcMain.on("finish", (event, arg) => {
     "groupID": GROUP_ID,
     "allocatedSize": ALLOCATED_SIZE,
     "group": GROUP,
-    "leader" : false,
+    "leader" : LEADER,
     "users" : {
       "users": [],
       "connections": [],
@@ -195,11 +263,6 @@ ipcMain.on("finish", (event, arg) => {
   mainWindow.loadFile('./src/pages/homepage.html')
   }
 });
-
-
-
-
-
 // Send user name
 ipcMain.on('GETUSERNAME', (event, arg) => {
   //send variable USER_NAME
@@ -273,25 +336,4 @@ ipcMain.on('GETUSERNAME', (event, arg) => {
 
 
 //////////////////////////////////////////////////////////////
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  createWindow()
 
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
-})
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
