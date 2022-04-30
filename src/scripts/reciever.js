@@ -129,7 +129,9 @@ function slicer(data) {
   const slicedData = data.slice(4);
   return slicedData;
 }
-  
+
+var groupID = "adefdf4wsefsf32"
+var pairID = "124eeaf4wsgs4gwe2";
 // 3. Answer the call with the unique ID
 answerButton.onclick = async () => {
   console.log("Answer Call")
