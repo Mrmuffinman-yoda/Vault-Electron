@@ -137,16 +137,15 @@ answerButton.onclick = async () => {
   console.log("Answer Call")
   const callId = textBox.value;
   const groupRef = firestore.collection("groups").doc(groupID);
-  const pairRef = firestore.collection("pairs").doc(pairID);
-  const callDoc = firestore.collection('calls').doc(callId);
-  const answerCandidates = callDoc.collection('answerCandidates');
-  const offerCandidates = callDoc.collection('offerCandidates');
+  const pairRef = groupRef.collection("pairs").doc(pairID);
+  const answerCandidates = pairRef.collection('answerCandidates');
+  const offerCandidates = pairRef.collection('offerCandidates');
 
   peerConnection.onicecandidate = (event) => {
     event.candidate && answerCandidates.add(event.candidate.toJSON());
   };
 
-  const callData = (await callDoc.get()).data();
+  const callData = (await pairRef.get()).data();
 
   const offerDescription = callData.offer;
   await peerConnection.setRemoteDescription(new RTCSessionDescription(offerDescription));
@@ -159,7 +158,7 @@ answerButton.onclick = async () => {
     sdp: answerDescription.sdp,
   };
 
-  await callDoc.update({ answer });
+  await pairRef.update({ answer });
 
   offerCandidates.onSnapshot((snapshot) => {
     snapshot.docChanges().forEach((change) => {

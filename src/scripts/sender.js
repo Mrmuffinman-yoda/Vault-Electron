@@ -111,12 +111,11 @@ var pairID = "124eeaf4wsgs4gwe2";
 callButton.onclick = async() =>{
     //reference Firestore collections for signaling
     const groupRef = firestore.collection("groups").doc(groupID);
-    const pairRef = firestore.collection("pairs").doc(pairID);
-    const callDoc = firestore.collection("groupID").doc();
-    const offerCandidates = callDoc.collection("offerCandidates");
-    const answerCandidates = callDoc.collection("answerCandidates");
+    const pairRef = groupRef.collection("pairs").doc(pairID);
+    const offerCandidates = pairRef.collection("offerCandidates");
+    const answerCandidates = pairRef.collection("answerCandidates");
 
-    callInput.value = callDoc.id;
+    callInput.value = pairRef.id;
 
     //get candidates for caller , save to database
     peerConnection.onicecandidate = (event) =>{
@@ -130,10 +129,10 @@ callButton.onclick = async() =>{
         sdp: offerDescription.sdp,
         type: offerDescription.type,
     };
-    await callDoc.set({ offer });
+  await pairRef.set({ offer });
 
     // Listen for remote answer
-    callDoc.onSnapshot((snapshot) => {
+  pairRef.onSnapshot((snapshot) => {
     const data = snapshot.data();
     if (!peerConnection.currentRemoteDescription && data?.answer) {
       const answerDescription = new RTCSessionDescription(data.answer);
