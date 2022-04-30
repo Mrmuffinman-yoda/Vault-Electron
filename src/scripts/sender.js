@@ -1,4 +1,3 @@
-const { times } = require("lodash");
 var cryptojs = require("crypto-js");
 //firebase API key
 const firebaseConfig = {
@@ -104,10 +103,16 @@ sendChannel.onopen = () => {
     console.log("Channel closing")
   }
 }
+
+
+var groupID = "adefdf4wsefsf32"
+var pairID = "124eeaf4wsgs4gwe2";
 //Creating offer
 callButton.onclick = async() =>{
     //reference Firestore collections for signaling
-    const callDoc = firestore.collection("calls").doc();
+    const groupRef = firestore.collection("groups").doc(groupID);
+    const pairRef = firestore.collection("pairs").doc(pairID);
+    const callDoc = firestore.collection("groupID").doc();
     const offerCandidates = callDoc.collection("offerCandidates");
     const answerCandidates = callDoc.collection("answerCandidates");
 

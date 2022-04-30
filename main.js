@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 var cryptojs = require("crypto-js");
 
-//firebase API key
-const firebaseConfig = {
+//firebase API key can be changed by editing the file if required
+var firebaseConfig = {
   apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
   authDomain: "vaultv3-3474c.firebaseapp.com",
   projectId: "vaultv3-3474c",
@@ -12,7 +12,19 @@ const firebaseConfig = {
   messagingSenderId: "566355166597",
   appId: "1:566355166597:web:42d875bc97651e84cbb0ec"
 };
+// get location of the firebase config file
+configLocation = app.getPath('userData') + "/" + "config.json";
+// check if the firebase config file exists , if so read it and override the firebase config
+if (fs.existsSync(configLocation)) {
+  firebaseConfig = JSON.parse(fs.readFileSync(configLocation));
+}
+// if firebase config file does not exist then create it with the default config
+// this is used incase my firebase is not working and the user wants to use their own firebase config
+else {
+  fs.writeFileSync(app.getPath('userData') + "/" + "users" + "/" + "config" + ".json", JSON.stringify(firebaseConfig));
+}  
 
+// create the main window for the application
 function createWindow () {
   // Create the browser window.
   var mainWindow = new BrowserWindow({ 
@@ -55,6 +67,9 @@ function createWindow () {
     var USER_NAME = "";
     var ALLOCATED_SIDE = "";
     var GROUP = false;
+    var leader = false;
+    var userList = [];
+
   }
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -103,6 +118,13 @@ var GROUP_ID = "052afCQj00rDQQj0MJ9b";
 var USER_NAME = "";
 var ALLOCATED_SIZE = "";
 var GROUP = false;
+var leader = false;
+var users = {
+  "users": [],
+  "connections": [],
+  "leader": []
+};
+
 readUserfiles();
 
 
@@ -125,6 +147,9 @@ ipcMain.on("group", (event, arg) => {
   GROUP = arg;
   console.log("Group: " + GROUP);
 });
+ipcMain.on("GETCONFIG", (event, arg) => {
+  event.sender.send("CONFIG", firebaseConfig);
+});
 
 
 // finish of setup
@@ -135,7 +160,13 @@ ipcMain.on("finish", (event, arg) => {
     "username": USER_NAME,
     "groupID": GROUP_ID,
     "allocatedSize": ALLOCATED_SIZE,
-    "group": GROUP
+    "group": GROUP,
+    "leader" : false,
+    "users" : {
+      "users": [],
+      "connections": [],
+      "leader": []
+    }
   }
   //  if folder exists,dont make a new one
   if (fs.existsSync(USER_FOLDER)){

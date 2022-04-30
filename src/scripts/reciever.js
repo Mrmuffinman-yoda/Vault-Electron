@@ -134,6 +134,8 @@ function slicer(data) {
 answerButton.onclick = async () => {
   console.log("Answer Call")
   const callId = textBox.value;
+  const groupRef = firestore.collection("groups").doc(groupID);
+  const pairRef = firestore.collection("pairs").doc(pairID);
   const callDoc = firestore.collection('calls').doc(callId);
   const answerCandidates = callDoc.collection('answerCandidates');
   const offerCandidates = callDoc.collection('offerCandidates');
