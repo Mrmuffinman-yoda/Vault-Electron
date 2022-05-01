@@ -121,17 +121,82 @@ function createWindow () {
   else{
     mainWindow.loadFile('index.html')
     console.log("User folder does not exist")
+    var userData;
     var USER_FOLDER = app.getPath('userData') + "/" + "users";
     var GROUP_ID = "";
     var USER_NAME = "";
-    var ALLOCATED_SIDE = "";
+    var ALLOCATED_SIZE = "";
     var GROUP = false;
     var leader = false;
-    var users = [];
+    var USERS = {};
     var USER_ID = "";
   }
 }
-
+ipcMain.on("finish", (event, arg) => {
+  var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
+  console.log("Finished");
+  var USER_ID = crypto.randomBytes(10).toString('hex');
+  // write username , groupID , allocated size and group to file
+  if(LEADER ===true){
+    var userData = {
+      USER_NAME: USER_NAME,
+      GROUP_ID: GROUP_ID,
+      ALLOCATED_SIZE: ALLOCATED_SIZE,
+      GROUP: GROUP,
+      LEADER: LEADER,
+      firsttime: true,
+      USER_ID: USER_ID,
+      USERS: {
+        USERS:[],
+        PAIRS: [],
+        LEADER: USER_ID
+      }
+    }
+  }
+  else{
+    var userData = {
+      USER_NAME: USER_NAME,
+      GROUP_ID: GROUP_ID,
+      ALLOCATED_SIZE: ALLOCATED_SIZE,
+      GROUP: GROUP,
+      LEADER: LEADER,
+      firsttime: true,
+      USER_ID: USER_ID,
+      USERS: {
+        USERS: [],
+        PAIRS: [],
+        LEADER: ""
+      }
+  }
+}
+  
+  //  if folder exists,dont make a new one
+  if (fs.existsSync(USER_FOLDER)) {
+    console.log("folder exists");
+    console.log(USER_FOLDER)
+  }
+  else {
+    fs.mkdir(USER_FOLDER, { recursive: true }, (err) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        console.log('Directory created successfully');
+        console.log(USER_DOWNLOAD)
+        fs.mkdir(USER_DOWNLOAD, { recursive: true }, (err) => {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            console.log('Directory created successfully');
+          }
+        });
+      }
+      fs.writeFileSync(userDataFile, JSON.stringify(userData));
+      mainWindow.loadFile('./src/pages/homepage.html')
+    });
+  }
+});
 //#region readUserdata
 readUserfiles = function () {
   var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
@@ -139,17 +204,19 @@ readUserfiles = function () {
   console.log("User data file: " + userDataFile);
   if (fs.existsSync(userDataFile)) {
     console.log("User data file exists");
-    var userData = fs.readFileSync(userDataFile);
+    userData = fs.readFileSync(userDataFile);
     console.log("User data: " + userData);
-    var userData = JSON.parse(userData);
-    GROUP_ID = userData.groupID;
-    USER_NAME = userData.username;
-    ALLOCATED_SIZE = userData.allocatedSize;
-    GROUP = userData.group;
-    leader = userData.leader;
-    users = userData.users;
-    USER_ID = userData.userID;
-    console.log("users: " + users);
+    userData = JSON.parse(userData);
+    GROUP_ID = userData.GROUP_ID;
+    USER_NAME = userData.USER_NAME;
+    ALLOCATED_SIZE = userData.ALLOCATED_SIZE;
+    GROUP = userData.GROUP;
+    LEADER = userData.LEADER;
+    USERS = userData.USERS;
+    USER_ID = userData.USER_ID;
+    FIRSTTIME = userData.firsttime;
+    console.log("USERS: " + USERS);
+    console.log("PAIRS[0]: " + USERS.PAIRS);
     console.log("User data: " + userData);
     console.log("userID: " + USER_ID);
     console.log("Group ID: " + GROUP_ID);
@@ -175,11 +242,11 @@ var GROUP;
 var LEADER;
 var firsttime;
 var USERS = {
-  "USERS": [],
-  "USERNAMES": [],
-  "PAIRS":[],
-  "PAIRID": [],
-  "LEADER": false
+  USERS: [],
+  USERNAMES: [],
+  PAIRS:[],
+  PAIRID: [],
+  LEADER: false
 };
 var USER_ID = "";
 
@@ -207,9 +274,7 @@ ipcMain.on("group", (event, arg) => {
   GROUP = arg;
   console.log("Group: " + GROUP);
 });
-ipcMain.on("GETCONFIG", (event, arg) => {
-  event.sender.send("CONFIG", firebaseConfig);
-});
+
 ipcMain.on("code", (event, arg) => {
   GROUP_ID = arg;
   LEADER = true;
@@ -230,6 +295,15 @@ ipcMain.on("GETUSERID", (event, arg) => {
 });
 ipcMain.on("GETPAIRID", (event, arg) => {
   event.sender.send("PAIRID", PAIR_ID);
+});
+ipcMain.on("GETUSERS", (event, arg) => {
+  event.sender.send("USERS", USERS);
+});
+
+ipcMain.on("SENDPAIRS", (event, arg) => {
+  console.log("Sending Pairs: " + USERS.PAIRS);
+  console.log("LENGTH:" + USERS.PAIRS.length);
+  event.sender.send("PAIRS", USERS.PAIRS);
 });
 
 //#endregion
@@ -292,64 +366,55 @@ ipcMain.on("RECIEVERWINDOW", (event, arg) => {
 //#endregion
 // send groupID to addFriend.html
 
-
-//#region end of setup
-// finish of setup
-ipcMain.on("finish", (event, arg) => {
-  console.log("Finished");
-  var USER_ID = crypto.randomBytes(10).toString('hex');
-  // write username , groupID , allocated size and group to file
-  var userData = {
-    "username": USER_NAME,
-    "groupID": GROUP_ID,
-    "allocatedSize": ALLOCATED_SIZE,
-    "group": GROUP,
-    "leader" : LEADER,
-    "firsttime" : false,
-    "userID": USER_ID,
-    "users" : {
-      "users": [],
-      "connections": [],
-      "leader": []
-    }
-  };
-  //  if folder exists,dont make a new one
-  if (fs.existsSync(USER_FOLDER)){
-    console.log("folder exists");
-    console.log(USER_FOLDER)
-  } 
-  else{
-    fs.mkdir(USER_FOLDER, { recursive: true }, (err) => {      
-    if (err) {
-      console.log(err);} 
-    else {
-      console.log('Directory created successfully');
-      console.log(USER_DOWNLOAD)
-      fs.mkdir(USER_DOWNLOAD, { recursive: true }, (err) => {
-        if (err) {
-          console.log(err);
-        }
-        else {
-          console.log('Directory created successfully');
-        }
-      });
-    }
-  });
+//Recieving data
+ipcMain.on("SETPAIRID", (event, arg) => {
+  var pairArray = [USER_ID, arg];
+  USERS.PAIRS.push(pairArray);
+  console.log("PAIRS: " + USERS.PAIRS);
   var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
-  fs.writeFileSync(userDataFile, JSON.stringify(userData));
-  mainWindow.loadFile('./src/pages/homepage.html')
+  if (fs.existsSync(userDataFile)) {
+    var userData = fs.readFileSync(userDataFile);
+    var userData = JSON.parse(userData);
+    //append newPair to Users.pair
+    userData.USERS.PAIRS.push(pairArray);
+    //write to file
+    fs.writeFileSync(userDataFile, JSON.stringify(userData));
+  }
+  else {
+    console.log("User data file does not exist");
   }
 });
-//#endregion
+ipcMain.on("SETUSERS", (event, arg) => {
+  // Push here as an array
+  // put pairArray in USERS.PAIRS
+  USERS.USERS.push(arg);
+  var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
+  if (fs.existsSync(userDataFile)) {
+    var userData = fs.readFileSync(userDataFile);
+    var userData = JSON.parse(userData);
+    //append newPair to Users.pair
+    userData.USERS.USERS.push(pairArray);
+    //write to file
+    fs.writeFileSync(userDataFile, JSON.stringify(userData));
+  }
+  else {
+    console.log("User data file does not exist");
+  }
+});
+
+//#region end of setup
 
 
 
 
 
 
-
-
-
+ipcMain.handle("GETCONFIG", (event, arg) => {
+  return firebaseConfig;
+});
+ipcMain.handle("GETFIRSTTIME", (event, arg) => {
+  return FIRSTTIME;
+});
 
 
 
