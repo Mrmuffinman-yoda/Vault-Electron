@@ -1,8 +1,21 @@
 //javascript file for selecting usernames
 const { app,ipcRenderer } = require('electron');
 //If username file exists then ignore this and continue with program
-
-
+//#region create variables which will be filled in 
+var GROUP_ID;
+var USER_NAME;
+var ALLOCATED_SIZE;
+var GROUP;
+var leader;
+var firsttime;
+var USER_ID;
+var USERS = {
+    "USERS": [],
+    "USERNAMES": [],
+    "PAIRS": [],
+    "PAIRID": [],
+    "LEADER": false
+};
 const firebaseConfig = {
     apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
     authDomain: "vaultv3-3474c.firebaseapp.com",
@@ -11,17 +24,9 @@ const firebaseConfig = {
     messagingSenderId: "566355166597",
     appId: "1:566355166597:web:42d875bc97651e84cbb0ec"
 };
-var GROUP_ID = "052afCQj00rDQQj0MJ9b";
-var USER_NAME = "";
-var ALLOCATED_SIZE = "";
-var GROUP = false;
-var leader = false;
-var users = {
-    "users": [],
-    "connections": [],
-    "leader": []
-};
+//#endregion
 window.onload = async() =>{
+    //#region get user information
     //ask main process to read username
     ipcRenderer.send('GETUSERNAME');
     ipcRenderer.on('RECIEVE', (event, arg) => {
@@ -39,56 +44,30 @@ window.onload = async() =>{
        GROUP_ID = arg;
        console.log(GROUP_ID);
     });
-    ipcRenderer.send("GETCONNECTIONID");
-    ipcRenderer.on('GETCONNECTIONID', (event, arg) => {
-         var connectionID = arg;
-        console.log("connectionID");
+    ipcRenderer.send("GETUSERID")
+    ipcRenderer.on('GETUSERID', (event, arg) => {
+        USER_ID = arg;
+        console.log(USER_ID);
     });
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const firestore = firebase.firestore();
-    const servers = {
-        iceServers: [
-            {
-                urls: ['stun:stun2.l.google.com:19302', 'stun:stun3.l.google.com:19302'],
-            },
-        ],
-        iceCandidatePoolSize: 10,
-    };
-    const groupRef = firestore.collection("groups").doc(GROUP_ID);
-    const pairRef = groupRef.collection("pairs").doc("connectionID");
-    const offerCandidates = pairRef.collection("offerCandidates");
-    const answerCandidates = pairRef.collection("answerCandidates");
+    //#endregion
+
+}
+
+const addFriend = document.getElementById("addFriend");
+
+addFriend.onclick = function(){
+    //tell main to make new window
+    ipcRenderer.send('ADDFRIENDWINDOW');
+}
+senderButton.onclick = function () {
+    //tell main to make new window
+    ipcRenderer.send('SENDERWINDOW');
+}
+
+recieverButton.onclick = function () {
+    //tell main to make new window
+    ipcRenderer.send('RECIEVERWINDOW');
+}
 
 
-    //Setting global state for webRTC
 
-    const sendConnection = new RTCPeerConnection(servers);
-    const recieveConnection = new RTCPeerConnection(servers);
-    const sendChannel = sendConnection.createDataChannel("sendChannel");
-    // callInput.value = pairRef.id;
-
-    //get candidates for caller , save to database
-    sendConnection.onicecandidate = (event) => {
-        event.candidate && offerCandidates.add(event.candidate.toJSON());
-
-    };
-    const offerDescription = await sendConnection.createOffer();
-    await sendConnection.setLocalDescription(offerDescription);
-
-    const offer = {
-        sdp: offerDescription.sdp,
-        type: offerDescription.type,
-    };
-    await pairRef.set({ offer });
-
-    // Listen for remote answer
-    pairRef.onSnapshot((snapshot) => {
-        const data = snapshot.data();
-        if (!sendConnection.currentRemoteDescription && data?.answer) {
-            const answerDescription = new RTCSessionDescription(data.answer);
-            sendConnection.setRemoteDescription(answerDescription);
-        }
-    });
-    }
