@@ -74,16 +74,7 @@ var firebaseConfig = {
   appId: "1:566355166597:web:42d875bc97651e84cbb0ec"
 };
 // get location of the firebase config file
-configLocation = app.getPath('userData') + "/" + "config.json";
-// check if the firebase config file exists , if so read it and override the firebase config
-if (fs.existsSync(configLocation)) {
-  firebaseConfig = JSON.parse(fs.readFileSync(configLocation));
-}
-// if firebase config file does not exist then create it with the default config
-// this is used incase my firebase is not working and the user wants to use their own firebase config
-else {
-  fs.writeFileSync(app.getPath('userData') + "/" + "users" + "/" + "config" + ".json", JSON.stringify(firebaseConfig));
-}  
+configLocation = app.getPath('userData') + "/" + "config.json"; 
 //#endregion
 // create the main window for the application
 function createWindow () {
