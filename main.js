@@ -274,11 +274,13 @@ ipcMain.on("username", (event, arg) => {
   console.log("Username: " + USER_NAME);
 });
 
-ipcMain.on("groupID", (event, arg,arg2,arg3,arg4) => {
+ipcMain.on("writeInfo", (event, arg,arg2,arg3,arg4,arg5) => {
   GROUP_ID = arg;
   USER_ID = arg2;
   USERS.USERS.push(arg4);
   ALLOCATED_SIZE = arg3;
+  PAIRID = arg5
+  PAIRS[0][1].push(arg5)  
   console.log("Group ID: " + GROUP_ID);
 });
 
@@ -467,10 +469,6 @@ ipcMain.handle("GETUSERNAME", (event, arg) => {
 ipcMain.handle("GETNICKNAME", (event, arg) => {
   return USERS.USERS;
 });
-ipcMain.handle("GETGROUPID", (event, arg) => {
-  return GROUP_ID
-});
-
 
 
 

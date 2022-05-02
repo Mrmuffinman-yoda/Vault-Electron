@@ -9,6 +9,7 @@ submitGroup.onclick = function(){
     var sizeLimit = document.getElementById('sizeLimit').value;
     var groupid = document.getElementById('groupid').value;
     var nickname = document.getElementById('Nickname').value;
+    var pairID = document.getElementById('pairID').value;
     console.log(groupid);
-    ipcRenderer.send('groupID', groupid, USER_ID,sizeLimit,nickname);
+    ipcRenderer.send('writeInfo', groupid, USER_ID,sizeLimit,nickname,pairID);
 }
