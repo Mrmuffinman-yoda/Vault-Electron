@@ -19,7 +19,14 @@
 
                                 <h2 class="fw-bold mb-2 text-uppercase">Lets add your friend!</h2>
                                 <p class="text-white-50 mb-5">Press the button below and give both IDs to your friend</p>
-                                <a id="genPairID" class="btn btn-outline-info btn-lg px-5" role="button">Generate</a>
+                                <form>
+                                    <input placeholder="Friends nickname" id="nickname" type="text" class="form-control form-control-lg" required />
+                                    <br>
+                                    <input placeholder="Friends UserID" id="nickUserID" type="text" class="form-control form-control-lg" required />
+                                    <br>
+                                    <a id="genPairID" class="btn btn-outline-info btn-lg px-5" role="button">Generate</a>
+                                </form>
+                                
                                 <h6 class="text-muted" id="pairID">PairID:</h6>
                                 <h6 class="text-muted" id = "groupID">GroupID:</h6>
                             </div>

@@ -1,4 +1,4 @@
-const {app, BrowserWindow, Menu , ipcMain, ipcRenderer} = require('electron')
+const {app, BrowserWindow, Menu , ipcMain, ipcRenderer, remote} = require('electron')
 const fs = require('fs');
 const path = require('path');
 var cryptojs = require("crypto-js");
@@ -135,7 +135,6 @@ function createWindow () {
 ipcMain.on("finish", (event, arg) => {
   var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
   console.log("Finished");
-  var USER_ID = crypto.randomBytes(10).toString('hex');
   // write username , groupID , allocated size and group to file
   if(LEADER ===true){
     var userData = {
@@ -193,7 +192,21 @@ ipcMain.on("finish", (event, arg) => {
         });
       }
       fs.writeFileSync(userDataFile, JSON.stringify(userData));
-      mainWindow.loadFile('./src/pages/homepage.html')
+      var secondaryWindow = new BrowserWindow({
+        width: 1000,
+        height: 800,
+        webPreferences: {
+          nodeIntegration: true,
+          contextIsolation: false,
+          enableRemoteModule: true,
+          autoHideMenuBar: true,
+          webSecurity: false,
+          icon: "./src/vaultLogo.ico",
+          preload: path.join(__dirname, 'preload.js'),
+        }
+      })
+      window.close();
+      secondaryWindow.loadFile('./src/pages/homepage.html')
     });
   }
 });
@@ -203,7 +216,6 @@ readUserfiles = function () {
   console.log(userDataFile);
   console.log("User data file: " + userDataFile);
   if (fs.existsSync(userDataFile)) {
-    console.log("User data file exists");
     userData = fs.readFileSync(userDataFile);
     console.log("User data: " + userData);
     userData = JSON.parse(userData);
@@ -215,6 +227,7 @@ readUserfiles = function () {
     USERS = userData.USERS;
     USER_ID = userData.USER_ID;
     FIRSTTIME = userData.firsttime;
+    PAIRS = userData.USERS.PAIRS;
     console.log("USERS: " + USERS);
     console.log("PAIRS[0]: " + USERS.PAIRS);
     console.log("User data: " + userData);
@@ -261,8 +274,10 @@ ipcMain.on("username", (event, arg) => {
   console.log("Username: " + USER_NAME);
 });
 
-ipcMain.on("groupID", (event, arg) => {
+ipcMain.on("groupID", (event, arg,arg2,arg3) => {
   GROUP_ID = arg;
+  USER_ID = arg2;
+  ALLOCATED_SIZE = arg3;
   console.log("Group ID: " + GROUP_ID);
 });
 
@@ -275,11 +290,13 @@ ipcMain.on("group", (event, arg) => {
   console.log("Group: " + GROUP);
 });
 
-ipcMain.on("code", (event, arg) => {
+ipcMain.on("code", (event, arg,arg2) => {
   GROUP_ID = arg;
+  USER_ID = arg2;
   LEADER = true;
   console.log("leader: " + LEADER);
   console.log("Group ID: " + GROUP_ID);
+  console.log("User ID: " + USER_ID);
 });
 // Send user name
 ipcMain.on('GETUSERNAME', (event, arg) => {
@@ -302,7 +319,6 @@ ipcMain.on("GETUSERS", (event, arg) => {
 
 ipcMain.on("SENDPAIRS", (event, arg) => {
   console.log("Sending Pairs: " + USERS.PAIRS);
-  console.log("LENGTH:" + USERS.PAIRS.length);
   event.sender.send("PAIRS", USERS.PAIRS);
 });
 
@@ -367,9 +383,11 @@ ipcMain.on("RECIEVERWINDOW", (event, arg) => {
 // send groupID to addFriend.html
 
 //Recieving data
-ipcMain.on("SETPAIRID", (event, arg) => {
-  var pairArray = [USER_ID, arg];
+ipcMain.on("SETPAIRID", (event, arg,arg2,arg3) => {
+  console.log(USER_ID)
+  var pairArray = [USER_ID, arg, arg3];
   USERS.PAIRS.push(pairArray);
+  USERS.USERS.push(arg2);
   console.log("PAIRS: " + USERS.PAIRS);
   var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
   if (fs.existsSync(userDataFile)) {
@@ -377,8 +395,10 @@ ipcMain.on("SETPAIRID", (event, arg) => {
     var userData = JSON.parse(userData);
     //append newPair to Users.pair
     userData.USERS.PAIRS.push(pairArray);
+    userData.USERS.USERS.push(pairArray);
     //write to file
     fs.writeFileSync(userDataFile, JSON.stringify(userData));
+    mainWindow.reload();
   }
   else {
     console.log("User data file does not exist");
@@ -416,13 +436,16 @@ ipcMain.handle("GETFIRSTTIME", (event, arg) => {
   return FIRSTTIME;
 });
 
-
-
-
-
-
-
-
+ipcMain.handle("GETGROUP", (event, arg) => {
+  console.log(GROUP)
+  return GROUP;
+  });
+ipcMain.handle("GETGROUPID", (event, arg) => {
+  return GROUP_ID;
+});
+ipcMain.handle("PAIRAMOUNT", (event, arg) => {
+  return PAIRS.length;
+});
 
 
 

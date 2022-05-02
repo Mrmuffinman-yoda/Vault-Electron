@@ -4,6 +4,7 @@ const path = require('path');
 var cryptojs = require("crypto-js");
 const crypto = require('crypto');
 
+var filler = document.getElementById("filler");
 window.onload = function() {
     ipcRenderer.send('GETUSERNAME');
     ipcRenderer.on('RECIEVE', (event, arg) => {
@@ -11,24 +12,50 @@ window.onload = function() {
         document.getElementById("userWelcome").innerHTML = "Welcome back " + USERNAME + "!";
         console.log(USERNAME);
     });
+    checkGroups();
     ipcRenderer.send("GETCONFIG");
     ipcRenderer.send("SENDPAIRS");
     ipcRenderer.on('PAIRS', (event, arg) => {
         PAIRS = arg;
+        console.log(PAIRS.length)
         var connected = [];
         for (var i = 0; i < PAIRS.length; i++) {
             connected[i] = false;
-        connections(arg,connected);
         }
+        if(PAIRS.length > 0){
+            checkGroups(arg,connected);
+        }
+        else{
+            filler.innerHTML = "You need to add friends first!"
+        }
+        // connections(arg,connected);
     });
     
 
 }
-ipcRenderer.send("GETGROUPID");
-ipcRenderer.on('GROUPID', (event, arg) => {
-    GROUP_ID = arg;
-});
-async function connections  (arg,connected){
+
+
+
+async function checkGroups (PAIRS,CONNECTED){
+    var GROUP = await ipcRenderer.invoke('GETGROUP');
+    console.log(GROUP)
+    if(GROUP ===true){
+        groupStarter(PAIRS,CONNECTED);
+    }
+    else if (GROUP === false){
+        pairStarter(PAIRS,CONNECTED)
+    }
+    else{
+        console.log("ERROR")
+    }
+}
+
+
+
+
+
+
+async function groupStarter() {
     var firebaseConfig = await ipcRenderer.invoke('GETCONFIG');
     console.log(firebaseConfig)
     var PAIRS = arg;
@@ -53,7 +80,7 @@ async function connections  (arg,connected){
         ],
         iceCandidatePoolSize: 10,
     };
-//#endregion
+    //#endregion
     var connectionArray = [];
     var connections = [];
     var pairArray = [];
@@ -72,8 +99,8 @@ async function connections  (arg,connected){
         offerCandidates[i] = pairArray[i].collection("offerCandidates");
         answerCandidates[i] = pairArray[i].collection("answerCandidates");
     }
-    console.log("GROUPID : " +GROUP_ID)
-    for (var i = 0; i < PAIRS.length; i++){
+    console.log("GROUPID : " + GROUP_ID)
+    for (var i = 0; i < PAIRS.length; i++) {
         connectionArray[i].onicecandidate = (event) => {
             event.candidate && offerCandidates[i].add(event.candidate.toJSON());
         };
@@ -86,8 +113,8 @@ async function connections  (arg,connected){
         var offer = offers[i]
         await pairArray[i].set({ offer });
     }
-    
-    for (var i = 0; i < PAIRS; i++){
+
+    for (var i = 0; i < PAIRS; i++) {
         pairArray[i].onSnapshot((snapshot) => {
             const data = snapshot.data();
             if (!connectionArray[i].currentRemoteDescription && data?.answer) {
@@ -96,7 +123,7 @@ async function connections  (arg,connected){
             }
         });
     }
-    for (var i = 0; i < PAIRS; i++){
+    for (var i = 0; i < PAIRS; i++) {
         connectionArray[i].addEventListener('connectionstatechange', event => {
             console.log("Listening for connection")
             if (connectionArray[i].connectionState === 'connected') {
@@ -120,6 +147,31 @@ async function connections  (arg,connected){
 
 }
 
+async function pairStarter(){
+    var content = `
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <p id = "username"> </p>
+            </div>
+            <div class="col-sm">
+            </div>
+            <div class="col-sm">
+                <button type="button" class="btn btn-success">Pair</button>
+                <button type="button" class="btn btn-danger">Pairing</button>
+            </div>
+        </div>
+    </div>`;
+    filler.innerHTML = content
+}
+ipcRenderer.send("GETGROUPID");
+ipcRenderer.on('GROUPID', (event, arg) => {
+    GROUP_ID = arg;
+});
+async function connections  (arg,connected){
+   
+}
+
 
 
 const addFriend = document.getElementById("addFriend");
@@ -137,3 +189,5 @@ recieverButton.onclick = function () {
     //tell main to make new window
     ipcRenderer.send('RECIEVERWINDOW');
 }
+
+
