@@ -10,6 +10,7 @@ submitGroup.onclick = function(){
     var groupid = document.getElementById('groupid').value;
     var nickname = document.getElementById('Nickname').value;
     var pairID = document.getElementById('pairID').value;
+    var otherUserID = document.getElementById('otherUserID').value;
     console.log(groupid);
-    ipcRenderer.send('writeInfo', groupid, USER_ID,sizeLimit,nickname,pairID);
+    ipcRenderer.send('writeInfo', groupid, USER_ID,sizeLimit,nickname,pairID,otherUserID);
 }

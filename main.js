@@ -265,13 +265,14 @@ ipcMain.on("username", (event, arg) => {
   console.log("Username: " + USER_NAME);
 });
 
-ipcMain.on("writeInfo", (event, arg,arg2,arg3,arg4,arg5) => {
+ipcMain.on("writeInfo", (event, arg,arg2,arg3,arg4,arg5,arg6) => {
   GROUP_ID = arg;
   USER_ID = arg2;
   USERS.USERS.push(arg4);
   ALLOCATED_SIZE = arg3;
   PAIRID = arg5
-  PAIRS[0][1].push(arg5)  
+  var tempArray = [arg2,arg5,arg6]
+  USERS.PAIRS.push(tempArray)  
   console.log("Group ID: " + GROUP_ID);
 });
 
