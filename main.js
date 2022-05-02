@@ -274,9 +274,10 @@ ipcMain.on("username", (event, arg) => {
   console.log("Username: " + USER_NAME);
 });
 
-ipcMain.on("groupID", (event, arg,arg2,arg3) => {
+ipcMain.on("groupID", (event, arg,arg2,arg3,arg4) => {
   GROUP_ID = arg;
   USER_ID = arg2;
+  USERS.USERS.push(arg4);
   ALLOCATED_SIZE = arg3;
   console.log("Group ID: " + GROUP_ID);
 });
@@ -321,6 +322,13 @@ ipcMain.on("SENDPAIRS", (event, arg) => {
   console.log("Sending Pairs: " + USERS.PAIRS);
   event.sender.send("PAIRS", USERS.PAIRS);
 });
+
+ipcMain.on("GROUP", (event, arg) => {
+  event.sender.send("GROUPT", GROUP);
+});
+
+
+
 
 //#endregion
 //make new window to add friends
@@ -395,7 +403,7 @@ ipcMain.on("SETPAIRID", (event, arg,arg2,arg3) => {
     var userData = JSON.parse(userData);
     //append newPair to Users.pair
     userData.USERS.PAIRS.push(pairArray);
-    userData.USERS.USERS.push(pairArray);
+    userData.USERS.USERS.push(arg2);
     //write to file
     fs.writeFileSync(userDataFile, JSON.stringify(userData));
     mainWindow.reload();
@@ -446,11 +454,22 @@ ipcMain.handle("GETGROUPID", (event, arg) => {
 ipcMain.handle("PAIRAMOUNT", (event, arg) => {
   return PAIRS.length;
 });
-
-
-
-
-
+ipcMain.handle("GETNickName", (event, arg) => {
+  console.log("USERS: "+USERS.USERS);
+  return USERS.USERS;
+});
+ipcMain.handle("GETPAIRS", (event, arg) => {
+  return USERS.PAIRS;
+});
+ipcMain.handle("GETUSERNAME", (event, arg) => {
+  return USER_NAME;
+  });
+ipcMain.handle("GETNICKNAME", (event, arg) => {
+  return USERS.USERS;
+});
+ipcMain.handle("GETGROUPID", (event, arg) => {
+  return GROUP_ID
+});
 
 
 

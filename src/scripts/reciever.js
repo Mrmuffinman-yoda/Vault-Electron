@@ -1,4 +1,4 @@
- //import firebase from './bower_components/firebase/firebase.js';
+   //import firebase from './bower_components/firebase/firebase.js';
 // import './bower_components/firebase/firebase-firestore.js';
 //import firebase from 'E:/Final Year Project work/Electron build/vault_electron/bower_components/firebase/firebase.js'
 //import 'E:/Final Year Project work/Electron build/vault_electron/bower_components/firebase/firebase-firestore.js';

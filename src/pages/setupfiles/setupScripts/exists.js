@@ -8,6 +8,7 @@ userIDText.innerHTML = "UserID : " + USER_ID;
 submitGroup.onclick = function(){
     var sizeLimit = document.getElementById('sizeLimit').value;
     var groupid = document.getElementById('groupid').value;
+    var nickname = document.getElementById('Nickname').value;
     console.log(groupid);
-    ipcRenderer.send('groupID', groupid, USER_ID,sizeLimit);
+    ipcRenderer.send('groupID', groupid, USER_ID,sizeLimit,nickname);
 }
