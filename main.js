@@ -249,7 +249,6 @@ var USERS = {
   USERS: [],
   USERNAMES: [],
   PAIRS:[],
-  PAIRID: [],
   LEADER: false
 };
 var USER_ID = "";
@@ -265,14 +264,27 @@ ipcMain.on("username", (event, arg) => {
   console.log("Username: " + USER_NAME);
 });
 
-ipcMain.on("writeInfo", (event, arg,arg2,arg3,arg4,arg5,arg6) => {
+ipcMain.on("writeInfo", (event,arg,arg1,arg2,arg3,arg4,arg5) => {
   GROUP_ID = arg;
-  USER_ID = arg2;
-  USERS.USERS.push(arg4);
-  ALLOCATED_SIZE = arg3;
-  PAIRID = arg5
-  var tempArray = [arg2,arg5,arg6]
-  USERS.PAIRS.push(tempArray)  
+  USER_ID = arg1;
+  USERS.USERS.push(arg3);
+  ALLOCATED_SIZE = arg2;
+  PAIRID = arg4
+  var tempArray = [arg1,arg5,arg6]
+  var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
+  if (fs.existsSync(userDataFile)) {
+    var userData = fs.readFileSync(userDataFile);
+    var userData = JSON.parse(userData);
+    //append newPair to Users.pair
+    userData.USERS.PAIRS.push(tempArray);
+    userData.USERS.USERS.push(USER);
+    //write to file
+    fs.writeFileSync(userDataFile, JSON.stringify(userData));
+    mainWindow.reload();
+  }
+  else {
+    console.log("User data file does not exist");
+  }
   console.log("Group ID: " + GROUP_ID);
 });
 

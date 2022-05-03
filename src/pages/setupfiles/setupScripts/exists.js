@@ -13,4 +13,5 @@ submitGroup.onclick = function(){
     var otherUserID = document.getElementById('otherUserID').value;
     console.log(groupid);
     ipcRenderer.send('writeInfo', groupid, USER_ID,sizeLimit,nickname,pairID,otherUserID);
+    ipcRenderer.send('SETPAIRID', pairID, nickname, otherUserID);
 }
