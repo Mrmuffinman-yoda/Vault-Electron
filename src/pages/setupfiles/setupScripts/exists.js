@@ -10,8 +10,15 @@ submitGroup.onclick = function(){
     var groupid = document.getElementById('groupid').value;
     var nickname = document.getElementById('Nickname').value;
     var pairID = document.getElementById('pairID').value;
-    var otherUserID = document.getElementById('otherUserID').value;
-    console.log(groupid);
-    ipcRenderer.send('writeInfo', groupid, USER_ID,sizeLimit,nickname,pairID,otherUserID);
-    ipcRenderer.send('SETPAIRID', pairID, nickname, otherUserID);
+    var externalID = document.getElementById('externalID').value;
+    console.log("GROUPID: " + groupid);
+    console.log("SIZE LIMIT: " + sizeLimit);
+    console.log("NICKNAME: " + nickname);
+    console.log("PAIRID: " + pairID);
+    console.log("USERID: " + externalID);
+    console.log("SETTING PAIR: " + pairID + " " + nickname + " " + externalID);
+    ipcRenderer.send('writeInfo', groupid, USER_ID, sizeLimit);
+    ipcRenderer.send('SETPAIRID', pairID, nickname, externalID);
+    console.log("SETTING GROUP: " + groupid + " " + sizeLimit);
+    
 }

@@ -114,12 +114,19 @@ function createWindow () {
     console.log("User folder does not exist")
     var userData;
     var USER_FOLDER = app.getPath('userData') + "/" + "users";
-    var GROUP_ID = "";
-    var USER_NAME = "";
-    var ALLOCATED_SIZE = "";
+    var GROUP_ID;
+    var USER_NAME;
+    var ALLOCATED_SIZE;
     var GROUP = false;
-    var leader = false;
-    var USERS = {};
+    var LEADER = false;
+    var firstttime;
+    var PAIRS;
+    var USERS = {
+      USERS: [],
+      PAIRS: [],
+      LEADER:"",
+
+    };
     var USER_ID = "";
   }
 }
@@ -128,6 +135,7 @@ ipcMain.on("finish", (event, arg) => {
   console.log("Finished");
   // write username , groupID , allocated size and group to file
   if(LEADER ===true){
+    console.log("Leader");
     var userData = {
       USER_NAME: USER_NAME,
       GROUP_ID: GROUP_ID,
@@ -137,13 +145,14 @@ ipcMain.on("finish", (event, arg) => {
       firsttime: true,
       USER_ID: USER_ID,
       USERS: {
-        USERS:[],
-        PAIRS: [],
+        USERS: USERS.USERS,
+        PAIRS: USERS.PAIRS,
         LEADER: USER_ID
       }
     }
   }
   else{
+    console.log("Not Leader");
     var userData = {
       USER_NAME: USER_NAME,
       GROUP_ID: GROUP_ID,
@@ -153,9 +162,9 @@ ipcMain.on("finish", (event, arg) => {
       firsttime: true,
       USER_ID: USER_ID,
       USERS: {
-        USERS: [],
-        PAIRS: [],
-        LEADER: ""
+        USERS: USERS.USERS,
+        PAIRS: USERS.PAIRS,
+        LEADER: LEADER_ID
       }
   }
 }
@@ -264,28 +273,13 @@ ipcMain.on("username", (event, arg) => {
   console.log("Username: " + USER_NAME);
 });
 
-ipcMain.on("writeInfo", (event,arg,arg1,arg2,arg3,arg4,arg5) => {
+ipcMain.on("writeInfo", (event,arg,arg1,arg2) => {
   GROUP_ID = arg;
   USER_ID = arg1;
-  USERS.USERS.push(arg3);
   ALLOCATED_SIZE = arg2;
-  PAIRID = arg4
-  var tempArray = [arg1,arg5,arg6]
-  var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
-  if (fs.existsSync(userDataFile)) {
-    var userData = fs.readFileSync(userDataFile);
-    var userData = JSON.parse(userData);
-    //append newPair to Users.pair
-    userData.USERS.PAIRS.push(tempArray);
-    userData.USERS.USERS.push(USER);
-    //write to file
-    fs.writeFileSync(userDataFile, JSON.stringify(userData));
-    mainWindow.reload();
-  }
-  else {
-    console.log("User data file does not exist");
-  }
   console.log("Group ID: " + GROUP_ID);
+  console.log("User ID: " + USER_ID);
+  console.log("Allocated Size: " + ALLOCATED_SIZE);
 });
 
 ipcMain.on("allocatedSide", (event, arg) => {
@@ -399,10 +393,13 @@ ipcMain.on("RECIEVERWINDOW", (event, arg) => {
 //Recieving data
 ipcMain.on("SETPAIRID", (event, arg,arg2,arg3) => {
   console.log(USER_ID)
+  LEADER_ID = arg3
   var pairArray = [USER_ID, arg, arg3];
+  console.log("PAIRARRAY: "+pairArray);
   USERS.PAIRS.push(pairArray);
   USERS.USERS.push(arg2);
   console.log("PAIRS: " + USERS.PAIRS);
+  console.log("USERS: " + USERS.USERS);
   var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
   if (fs.existsSync(userDataFile)) {
     var userData = fs.readFileSync(userDataFile);
