@@ -86,8 +86,8 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
 
     peerConnection.onicecandidate = (event) => {
         event.candidate && answerCandidates.add(event.candidate.toJSON());
+        console.log("TEST");
     };
-
     const callData = (await PAIR.get()).data();
 
     const offerDescription = callData.offer;
@@ -147,27 +147,42 @@ const createConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAM
         ],
         iceCandidatePoolSize: 10,
     };
-    const peerConnection = new RTCPeerConnection(servers);
     const firestore = firebase.firestore();
+    const peerConnection = new RTCPeerConnection(servers);
     const sendChannel = peerConnection.createDataChannel("Channel");
     console.log("Channel created");
+
     const groupRef = firestore.collection("GroupID").doc(GROUP_ID);
     const PAIR = groupRef.collection("PAIRS").doc(PAIRS[0][1]);
     const offerCandidates = PAIR.collection("offerCandidates");
     const answerCandidates = PAIR.collection("answerCandidates");
     console.log(GROUP_ID)
 
+    const offerDescription = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offerDescription);
+    
     peerConnection.onicecandidate = (event) => {
         event.candidate && offerCandidates.add(event.candidate.toJSON());
 
     };
-    const offerDescription = await peerConnection.createOffer();
-    await peerConnection.setLocalDescription(offerDescription);
+    
 
     const offer = {
         sdp: offerDescription.sdp,
         type: offerDescription.type,
     };
+
+    await PAIR.set({ offer });
+
+    answerCandidates.onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added') {
+                let data = change.doc.data();
+                peerConnection.addIceCandidate(new RTCIceCandidate(data));
+            }
+        });
+    });
+
 
     PAIR.onSnapshot((snapshot) => {
         const data = snapshot.data();

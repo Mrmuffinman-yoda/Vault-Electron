@@ -335,8 +335,8 @@ ipcMain.on("GROUP", (event, arg) => {
 //#region windows for each page on homepage
 ipcMain.on("ADDFRIENDWINDOW", (event, arg) => {
   var addWindow = new BrowserWindow({
-    width: 500,
-    height: 500,
+    width: 700,
+    height: 700,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -470,7 +470,9 @@ ipcMain.handle("GETUSERNAME", (event, arg) => {
 ipcMain.handle("GETNICKNAME", (event, arg) => {
   return USERS.USERS;
 });
-
+ipcMain.handle("GETUSERID", (event, arg) => {
+  return USER_ID;
+});
 
 
 
