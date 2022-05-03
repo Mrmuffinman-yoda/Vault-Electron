@@ -122,6 +122,7 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
 
     peerConnection.ondatachannel = (event) => {
         const recieveChannel = event.channel;
+        recieveChannel.send("ARE WE CONNECTED?");
         recieveChannel.onmessage = (event) => {
             console.log(event.data);
         }
@@ -207,10 +208,11 @@ const createConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAM
     });
     sendChannel.onmessage = (event) => {
         console.log("Message received: " + event.data);
+        sendChannel.send("Ye bro");    
     }
 
 
-}
+}   
 
 
 
