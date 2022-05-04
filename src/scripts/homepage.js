@@ -9,6 +9,7 @@ var GROUP;
 var size;
 
 window.onload = function() {
+    ipcRenderer.send("BACKUP");
     init();
 }
 
