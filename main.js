@@ -225,8 +225,6 @@ ipcMain.on("finish", (event, arg) => {
           }
         });
       }
-      var window = remote.BrowserWindow.getAllWindows()[0]
-      window.close()
       secondaryWindow.loadFile('./src/pages/homepage.html')
     });
     
@@ -352,22 +350,22 @@ ipcMain.on("GROUP", (event, arg) => {
 
 
 ipcMain.on("BACKUPWINDOW", (event, arg) => {
-  var addWindow = new BrowserWindow({
-    width: 700,
-    height: 700,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      enableRemoteModule: true,
-      autoHideMenuBar: true,
-      webSecurity: false,
-      icon: './src/logo.ico',
-    }
-  });
-  addWindow.loadFile('./src/pages/backupSettings.html');
-  addWindow.on('closed', function () {
-    addWindow = null
-  })
+  // var addWindow = new BrowserWindow({
+  //   width: 700,
+  //   height: 700,
+  //   webPreferences: {
+  //     nodeIntegration: true,
+  //     contextIsolation: false,
+  //     enableRemoteModule: true,
+  //     autoHideMenuBar: true,
+  //     webSecurity: false,
+  //     icon: './src/logo.ico',
+  //   }
+  console.log("NULL")
+  // addWindow.loadFile('./src/pages/backupSettings.html');
+  // addWindow.on('closed', function () {
+  //   addWindow = null
+  // })
 });
 
 //#endregion

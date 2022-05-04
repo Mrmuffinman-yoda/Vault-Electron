@@ -126,6 +126,7 @@ async function init(){
 const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAME,GROUP_ID,FilesList,peerLocation,zipLocation) =>{
     var button3 = document.getElementById("backupNow");
     var button5 = document.getElementById("recieveNow");
+    button5.disable = true;
     
     
     if (!firebase.apps.length) {
@@ -242,6 +243,7 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
                     const hash = cryptojs.MD5(blob);
                     console.log("Hash: " + hash);
                     console.log("File recieved")
+                    button5.innerHTML = "Recieved file";
                 }
             } catch (err) {
                 console.log(err)
@@ -326,6 +328,7 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
     });
     
     sendChannel.onopen = () => {
+        var backupNow = document.getElementById("backupNow");
         const filename = zipLocation;
         //read file from zipLocation
         const file = fs.readFileSync(filename);
@@ -348,6 +351,7 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
                 //wait if buffer is full
                 // console.clear()
                 console.log(Math.round((i / chunks) * 100) + "%");
+                backupNow.innerHTML = Math.round((i / chunks) * 100) + "%";
 
                 while (sendChannel.bufferedAmount > MAXIMUM_FILE_SIZE) {
                     await new Promise(resolve => setTimeout(resolve, 100));
