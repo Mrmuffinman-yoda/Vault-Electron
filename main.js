@@ -598,7 +598,7 @@ ipcMain.handle("GETUSERID", (event, arg) => {
 // encrypt files and save them in files of USER_ID
 ipcMain.on("BACKUP", (event, arg) => {
   //check if key file exists in user folder , if not create one and save key 
-  var USER_DOWNLOAD = USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID;
+  var USER_DOWNLOAD = app.getPath('userData') + "/" + "Files" + "/" + "USERIDS" + "/" + USER_ID;
   var keyFile = USER_FOLDER + "/" + "key.json";
   if (!fs.existsSync(keyFile)) {
     var key = crypto.randomBytes(32).toString('hex');
@@ -635,7 +635,7 @@ ipcMain.on("BACKUP", (event, arg) => {
 // decrypt files and save them in downloads folder
 ipcMain.on("RESTORE", (event, arg) => {
   //check if key file exists in user folder , if not create one and save key
-  var USER_DOWNLOAD = USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID;
+  var USER_DOWNLOAD = app.getPath('userData') + "/" + "Files" + "/" + "USERIDS" + "/" + USER_ID;
   var keyFile = USER_FOLDER + "/" + "key.json";
   //read key file
   var keyData = fs.readFileSync(keyFile);
