@@ -69,22 +69,18 @@ peerConnection.ondatachannel = (event) => {
 
     // // download file from blob
     const data = event.data;
-    const FILE_NAME = "";
     try{
-      // if(data = "NAME"){
-      //   for(var i = 0; i < 2; i++){
-      //     FILE_NAME = data
-      //   }
-      // }
+      if (typeof data !== "object" && data !== END_OF_FILE) {
+        if (data.substring(0, 4) === "NAME") {
+          // remove first 4 letters from data
+          FILE_NAME = data.substring(4, data.length)
+        }
+      }
       if(data !== END_OF_FILE){
         receivedbuffer.push(data);
       }
       else{
-        if(event.type === String){
-            FILE_NAME = str.substring(1)
-            a.download = FILE_NAME;
-            console.log("File name is : " + FILE_NAME)
-          }
+        
         const arrayBuffer = receivedbuffer.reduce((acc, curr) => {
           const tmp = new Uint8Array(acc.byteLength + curr.byteLength);
           tmp.set(new Uint8Array(acc), 0);
