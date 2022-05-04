@@ -306,16 +306,18 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
     
     sendChannel.onopen = () => {
         const filename = zipLocation;
-        //change filename to blob
-        const file = new File([filename], filename, { type: 'application/octet-stream' });
+        //read file from zipLocation
+        const file = fs.readFileSync(filename);
+        //convert file to blob
+        const blob = new Blob([file], { type: 'application/octet-stream' });
         console.log("Sending files")
         var readyState = sendChannel.readyState;
         sendChannel.send("Name" + "backup.zip");
         console.log("Name" + "backup.zip")
         const MAXIMUM_FILE_SIZE = 64000;
         const END_of_FILE = "EOF";
-        const fileReader = new FileReader(file);
-        fileReader.readAsArrayBuffer(file);
+        const fileReader = new FileReader(blob);
+        fileReader.readAsArrayBuffer(blob);
         fileReader.onload = async () => {
             const arrayBuffer = fileReader.result;
             const byteArray = new Uint8Array(arrayBuffer);
