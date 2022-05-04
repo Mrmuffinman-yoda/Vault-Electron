@@ -119,7 +119,6 @@ async function init(){
 }
 const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAME,GROUP_ID,FilesList,peerLocation,zipLocation) =>{
     var button3 = document.getElementById("backupNow");
-    var button4 = document.getElementById("recoverNow");
     var button5 = document.getElementById("recieveNow");
     
     
@@ -197,11 +196,6 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
             // // download file from blob
             const data = event.data;
             try {
-                // if(data = "NAME"){
-                //   for(var i = 0; i < 2; i++){
-                //     FILE_NAME = data
-                //   }
-                // }
                 if (typeof data !== "object" && data !== END_OF_FILE) {
                     if (data.substring(0, 4) === "NAME") {
                         // remove first 4 letters from data
@@ -214,7 +208,7 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
                 }
                 else {
                     //Finished recieving file
-                    const arrayBuffer = receivedbuffer.reduce((acc, curr) => {
+                    const arrayBuffer = recievedbuffer.reduce((acc, curr) => {
                         const tmp = new Uint8Array(acc.byteLength + curr.byteLength);
                         tmp.set(new Uint8Array(acc), 0);
                         tmp.set(new Uint8Array(curr), acc.byteLength);
@@ -322,6 +316,7 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
         console.log("Sending files")
         var readyState = sendChannel.readyState;
         sendChannel.send("Name" + filename);
+        console.log("Sending file name"+ filename)
         const MAXIMUM_FILE_SIZE = 64000;
         const END_of_FILE = "EOF";
         const fileReader = new FileReader(file);
