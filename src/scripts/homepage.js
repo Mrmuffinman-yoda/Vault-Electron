@@ -368,6 +368,7 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
             // console.log("Hash: " + hash);
             sendChannel.send(END_of_FILE);
             console.log("File sent");
+            backupNow.innerHTML = "100%";
         }
     }
     if (readyState == "closed") {
