@@ -259,6 +259,7 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
     const firestore = firebase.firestore();
     const peerConnection = new RTCPeerConnection(servers);
     const sendChannel = peerConnection.createDataChannel("Channel");
+
     console.log("Channel created");
 
     const groupRef = firestore.collection("GroupID").doc(GROUP_ID);
@@ -282,7 +283,7 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
 
     await PAIR.set({ offer });
 
-    answerCandidates.onSnapshot((snapshot) => {
+    PAIR.onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
             if (change.type === 'added') {
                 let data = change.doc.data();
@@ -308,27 +309,62 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
         })
     })
     peerConnection.addEventListener('connectionstatechange', event => {
-        button3.disabled = false;
-        button4.disabled = false;
-        button5.disabled = false;
         console.log("Listening for connection")
         if (peerConnection.connectionState === 'connected') {
             console.log("[STATUS]:" + sendChannel.readyState)
         }
     });
-
-    button3.onclick = function () {
-        send();
-    }
     
     sendChannel.onopen = () => {
         const filename = zipLocation;
-        var readyState = sendCHannel.readyState;
+        //change filename to blob
+        const file = new File([filename], filename, { type: 'application/octet-stream' });
+        console.log("Sending files")
+        var readyState = sendChannel.readyState;
         sendChannel.send("Name" + filename);
-        
-    }
+        const MAXIMUM_FILE_SIZE = 64000;
+        const END_of_FILE = "EOF";
+        const fileReader = new FileReader(file);
+        fileReader.readAsArrayBuffer(file);
+        fileReader.onload = async () => {
+            const arrayBuffer = fileReader.result;
+            const byteArray = new Uint8Array(arrayBuffer);
+            const chunkSize = MAXIMUM_FILE_SIZE;
+            const chunks = Math.ceil(byteArray.length / chunkSize);
+            for (let i = 0; i < chunks; i++) {
+                //wait if buffer is full
+                console.clear()
+                console.log(Math.round((i / chunks) * 100) + "%");
 
+                while (sendChannel.bufferedAmount > MAXIMUM_FILE_SIZE) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                const start = i * chunkSize;
+                const end = start + chunkSize;
+                const chunk = byteArray.slice(start, end);
+                const chunkBuffer = new Uint8Array(chunk);
+                const chunkArrayBuffer = chunkBuffer.buffer;
+                sendChannel.send(chunkArrayBuffer);
+            }
+            //take a hash of file
+            // const hash = cryptojs.MD5(arrayBuffer);
+            // console.log("Hash: " + hash);
+            sendChannel.send(END_of_FILE);
+        }
+    }
+    if (readyState == "closed") {
+        console.log("Channel closed")
+    }
+    if (readyState == "connecting") {
+        console.log("Channel connecting")
+    }
+    if (readyState == "closing") {
+        console.log("Channel closing")
+    }
 }
+
+
+   
 
 
 

@@ -657,7 +657,7 @@ ipcMain.handle("GETPEERLOCATION", (event, arg) => {
 ipcMain.handle("GETBACKUPZIP", (event, arg) => {
   return app.getPath('userData') + "/" + "Files" + "/" + "USERIDS" + "/" + USER_ID + "/" + "backup.zip";
   }
-  );
+);
 
 
 
