@@ -196,12 +196,7 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
             // // download file from blob
             const data = event.data;
             try {
-                if (typeof data !== "object" && data !== END_OF_FILE) {
-                    if (data.substring(0, 4) === "NAME") {
-                        // remove first 4 letters from data
-                        FILE_NAME = data.substring(4, data.length)
-                    }
-                }
+                var FILE_NAME = "backup.zip"
                 if (data !== END_OF_FILE) {
 
                     recievedbuffer.push(data);
