@@ -1,4 +1,4 @@
-const { app, ipcRenderer } = require('electron');
+const { app, ipcRenderer, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
 var cryptojs = require("crypto-js");
@@ -19,14 +19,20 @@ window.onload = function() {
 //     GROUP = arg;
 // });
 
-fsUtils.fsize(ipcRenderer.invoke('GETDOWNLOADS'), function (errs, size) {
-    var size = size / 1000000000;
-    console.log("Download folder size: " + size);
-});
 
-async function init(size){
-  
-    
+async function filesize(){
+
+}
+
+
+async function init(){
+    fsUtils.fsize(await ipcRenderer.invoke('GETDOWNLOADS'), function (errs, size) {
+        var size = size / 1000000000;
+        console.log("Download folder size: " + size);
+        return size
+    });
+
+
     var FilesList = await ipcRenderer.invoke("GETFILES")
     console.log("Files List: "+FilesList);
     console.log("Folder Size: "+ size);
@@ -37,6 +43,7 @@ async function init(size){
     var NICKNAME = await ipcRenderer.invoke('GETNICKNAME');
     var GROUP_ID = await ipcRenderer.invoke('GETGROUPID');
     var filler = document.getElementById("filler");
+    var filler2 = document.getElementById("filler2");
     var content = `
     <div class="p-3 mb-2 bg-secondary  text-white">
         <div class="row">
@@ -51,6 +58,32 @@ async function init(size){
             </div>
         </div>
     </div>`;
+    var content2 = `
+        <div class="p-3 mb-2 bg-secondary  text-white">
+                        <div class="row">
+                          <div class="col-sm">
+                            <h6 id="username">Select to backup  </h6>
+                          </div>
+                          <div class="col-sm">
+                          </div>
+                          <div class="col-sm">
+                            <button id="backupNow" type="button" class="btn btn-success">Backup Now</button>
+                        </div>
+                      </div>
+                      </div>
+                      <div class="p-3 mb-2 bg-secondary  text-white">
+                        <div class="row">
+                          <div class="col-sm">
+                            <h6 id="username">Select to recover files</h6>
+                          </div>
+                          <div class="col-sm">
+                          </div>
+                          <div class="col-sm">
+                            <button id="recoverNow" type="button" class="btn btn-success">Recover Now</button>
+                          </div>
+                        </div>
+                      </div>`;
+
     console.log("Is it too big ? :" + size);
     document.getElementById("userWelcome").innerHTML = "Welcome back " + USERNAME + "!";
     console.log("GROUP: "+GROUP)
@@ -59,22 +92,39 @@ async function init(size){
     console.log("NICKNAME: "+NICKNAME[0])
     if (PAIRS.length >= 1 && GROUP === false) {
         filler.innerHTML += content;
+        filler2.innerHTML += content2;
+
         document.getElementById("username").innerHTML = NICKNAME[0];
     }
     else if (PAIRS.length = 0) {
         filler.innerHTML = "You have no group yet, please create one";
     }
-    console.log("SIZE: " + size)
     var button = document.getElementById("Single pairer");
     var button2 = document.getElementById("Single Paree");
+    var button3 = document.getElementById("backupNow");
+    var button4 = document.getElementById("recoverNow");
+    button3.disabled = true;
+    button4.disabled = true;
     button.onclick = function () {
         createConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList);
+        button.disabled = true;
+        button2.disabled = true;
+    }
     button2.onclick = function () {
         recieveConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList);
+        button.disabled = true;
+        button2.disabled = true;
+    }
+    button3.onclick = function () {
+        ipcRenderer.send("BACKUP");
     }
 }
-}
 const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAME,GROUP_ID,FilesList) =>{
+    var button3 = document.getElementById("backupNow");
+    var button4 = document.getElementById("recoverNow");
+    
+    
+    
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -132,6 +182,8 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
 
 
     peerConnection.ondatachannel = (event) => {
+        button3.disabled = false;
+        button4.disabled = false;
         const recieveChannel = event.channel;
         recieveChannel.send("ARE WE CONNECTED?");
         recieveChannel.onmessage = (event) => {
@@ -148,6 +200,9 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
 
 }
 const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList) =>{
+    var button3 = document.getElementById("backupNow");
+    var button4 = document.getElementById("recoverNow");
+    
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -212,6 +267,8 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
         })
     })
     peerConnection.addEventListener('connectionstatechange', event => {
+        button3.disabled = false;
+        button4.disabled = false;
         console.log("Listening for connection")
         if (peerConnection.connectionState === 'connected') {
             console.log("[STATUS]:" + sendChannel.readyState)

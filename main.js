@@ -6,8 +6,10 @@ const crypto = require('crypto');
 const ClientId = "970034993361473546";
 const DiscordRPC = require("discord-rpc");
 var fsUtils = require("nodejs-fs-utils");
+const archiver = require('archiver');
 const RPC = new DiscordRPC.Client({ transport: 'ipc' });
 DiscordRPC.register(ClientId);
+archiver.registerFormat('zip-encrypted', require("archiver-zip-encrypted"));
 
 //#region DiscordRPC
 function setActivity() {
@@ -532,41 +534,7 @@ ipcMain.handle("GETFILES", async (event, arg) => {
   }
 }
 );
-// encrypt files from downloads folder and save them in files of USER_ID
-ipcMain.on("ENCRYPT", (event, arg) => {
-  var Downloads = app.getPath("desktop") + "/Vault";
-  if (fs.existsSync(Downloads)) {
-    var files = fs.readdirSync(Downloads);
-    for (var i = 0; i < files.length; i++) {
-      var file = files[i];
-      var filePath = Downloads + "/" + file;
-      var fileData = fs.readFileSync(filePath);
-      var encryptedFile = encrypt(fileData, USER_ID);
-      var encryptedFilePath = USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID
-      fs.writeFileSync(encryptedFilePath, encryptedFile);
-      fs.unlinkSync(filePath);
-    }
-  }
-  else {
-    console.log("No files");
-  }
-}
-);
-// decrypt files from files of USER_ID and save them in a new folder in downloads
-ipcMain.on("DECRYPT", (event, arg) => {
-  var files = fs.readdirSync(USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID);
-  for (var i = 0; i < files.length; i++) {
-    var file = files[i];
-    var filePath = USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID + "/" + file;
-    var fileData = fs.readFileSync(filePath);
-    var decryptedFile = decrypt(fileData, USER_ID);
-    var decryptedFilePath = app.getPath("desktop") + "/Vault" + "/" + file;
-    fs.writeFileSync(decryptedFilePath, decryptedFile);
-    fs.unlinkSync(filePath);
-  }
-}
-);
-    
+ 
 // check if download folder is less than allocated_size
 ipcMain.on("CHECKDOWNLOADSSIZE", (event, arg) => {
   var size;
@@ -591,12 +559,6 @@ ipcMain.handle("GETDOWNLOADS", async (event, arg) => {
   var Downloads = app.getPath("desktop") + "/Vault";
   return Downloads;
 });
-
-
-
-
-
-
 
 
 ipcMain.handle("GETCONFIG", (event, arg) => {
@@ -633,8 +595,59 @@ ipcMain.handle("GETUSERID", (event, arg) => {
   return USER_ID;
 });
 
-
-
+// encrypt files and save them in files of USER_ID
+ipcMain.on("BACKUP", (event, arg) => {
+  //check if key file exists in user folder , if not create one and save key 
+  var USER_DOWNLOAD = USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID;
+  var keyFile = USER_FOLDER + "/" + "key.json";
+  if (!fs.existsSync(keyFile)) {
+    var key = crypto.randomBytes(32).toString('hex');
+    var keyData = {
+      key: key
+    }
+    fs.writeFileSync(keyFile, JSON.stringify(keyData));
+  }
+  //read key file 
+  var keyData = fs.readFileSync(keyFile);
+  var keyData = JSON.parse(keyData);
+  var key = keyData.key;
+  //zip files in downloads folder to backup.zip in USERID folder
+  var backup = USER_DOWNLOAD + "/" + "backup.zip";
+  var files = fs.readdirSync(Downloads);
+  var archive = archiver.create('zip-encrypted', {
+    zlib: { level: 9 },
+    encryptionMethod: 'aes256',
+    password: key
+  }
+  );
+  var stream = fs.createWriteStream(backup);
+  archive.pipe(stream);
+  files.forEach(file => {
+    archive.file(Downloads + "/" + file, { name: file });
+  }
+  );
+  archive.finalize();
+  stream.on('close', function () {
+    console.log("BACKUP COMPLETE");
+  }
+  );
+});
+// decrypt files and save them in downloads folder
+ipcMain.on("RESTORE", (event, arg) => {
+  //check if key file exists in user folder , if not create one and save key
+  var USER_DOWNLOAD = USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID;
+  var keyFile = USER_FOLDER + "/" + "key.json";
+  //read key file
+  var keyData = fs.readFileSync(keyFile);
+  var keyData = JSON.parse(keyData);
+  var key = keyData.key;
+  // move backup.zip to desktop
+  var backup = USER_DOWNLOAD + "/" + "backup.zip";
+  var dest = app.getPath("desktop") + "/Vault";
+  fs.renameSync(backup, dest + "/" + "backup.zip");
+  //send key back to homepage.js
+  event.sender.send("RESTORE", key);
+});
 
 
 
