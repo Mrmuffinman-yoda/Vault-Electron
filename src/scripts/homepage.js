@@ -56,10 +56,7 @@ async function init(){
             </div>
             <div class="col-sm">
             </div>
-            <div class="col-sm">
-                <button id = "Single pairer" type="button" class="btn btn-success">Create</button>
-                <button id = "Single Paree" type="button" class="btn btn-danger"> Await </button>
-            </div>
+            
         </div>
     </div>`;
     var content2 = `
@@ -75,18 +72,7 @@ async function init(){
                         </div>
                       </div>
                       </div>
-                      <div class="p-3 mb-2 bg-secondary  text-white">
-                        <div class="row">
-                          <div class="col-sm">
-                            <h6 id="username">Select to recover files</h6>
-                          </div>
-                          <div class="col-sm">
-                          </div>
-                          <div class="col-sm">
-                            <button id="recoverNow" type="button" class="btn btn-success">Recover Now</button>
-                          </div>
-                        </div>
-                        </div>
+                      
                         <div class="p-3 mb-2 bg-secondary  text-white">
                         <div class="row">
                           <div class="col-sm">
@@ -99,7 +85,6 @@ async function init(){
                           </div>
                         </div>
                         </div>
-                        
                         `;
 
     console.log("Is it too big ? :" + size);
@@ -117,23 +102,19 @@ async function init(){
     else if (PAIRS.length = 0) {
         filler.innerHTML = "You have no group yet, please create one";
     }
-    var button = document.getElementById("Single pairer");
-    var button2 = document.getElementById("Single Paree");
+    // var button = document.getElementById("Single pairer");
+    // var button2 = document.getElementById("Single Paree");
     var button3 = document.getElementById("backupNow");
-    var button4 = document.getElementById("recoverNow");
     var button5 = document.getElementById("recieveNow");
-    button3.disabled = true;
-    button4.disabled = true;
-    button5.disabled = true;
-    button.onclick = function () {
+    button3.onclick = function () {
+        //Send files
         createConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList, location, Backupzip);
-        button.disabled = true;
-        button2.disabled = true;
+
     }
-    button2.onclick = function () {
+    button5.onclick = function () {
+        //Recieve files
         recieveConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList, location, Backupzip);
-        button.disabled = true;
-        button2.disabled = true;
+
     }
 }
 const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAME,GROUP_ID,FilesList,peerLocation,zipLocation) =>{
@@ -165,7 +146,6 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
 
     peerConnection.onicecandidate = (event) => {
         event.candidate && answerCandidates.add(event.candidate.toJSON());
-        console.log("TEST");
     };
     const callData = (await PAIR.get()).data();
 
@@ -200,55 +180,71 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
 
 
     peerConnection.ondatachannel = (event) => {
-        button3.disabled = false;
-        button4.disabled = false;
-        button5.disabled = false;
-        const recieveChannel = event.channel;
-        recieveChannel.send("ARE WE CONNECTED?");
-        recieveChannel.onmessage = (event) => {
-            console.log(event.data);
-        }
-    }
+        const sendChannel = event.channel;
+        var downloadLocation = peerLocation;
+        sendChannel.binaryType = 'arraybuffer';
+        const recievedbuffer = [];
+        sendChannel.onmessage = (event) => {
+            const END_OF_FILE = 'EOF';
+            // // download file from arraybuffer
+            // const a = document.createElement('a');
+            // const url = window.URL.createObjectURL(event);
+            // a.href = url;
+            // a.download = 'file.txt';
+            // a.click();
+            // window.URL.revokeObjectURL(url);
 
+            // // download file from blob
+            const data = event.data;
+            try {
+                // if(data = "NAME"){
+                //   for(var i = 0; i < 2; i++){
+                //     FILE_NAME = data
+                //   }
+                // }
+                if (typeof data !== "object" && data !== END_OF_FILE) {
+                    if (data.substring(0, 4) === "NAME") {
+                        // remove first 4 letters from data
+                        FILE_NAME = data.substring(4, data.length)
+                    }
+                }
+                if (data !== END_OF_FILE) {
 
+                    recievedbuffer.push(data);
+                }
+                else {
+                    //Finished recieving file
+                    const arrayBuffer = receivedbuffer.reduce((acc, curr) => {
+                        const tmp = new Uint8Array(acc.byteLength + curr.byteLength);
+                        tmp.set(new Uint8Array(acc), 0);
+                        tmp.set(new Uint8Array(curr), acc.byteLength);
+                        return tmp.buffer;
+                    }, new ArrayBuffer(0));
+                    const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    //send file name to main.js
 
-const send = () => {
-    sendChannel.send("SENDING");
-    const filename = zipLocation
-
-    const MAXIMUM_FILE_SIZE = 64000;
-    const END_OF_FILE = 'EOF';
-
-    const fileReader = new FileReader(filename);
-    fileReader.readAsArrayBuffer(filename);
-    fileReader.onload = function (event) {
-        const arrayBuffer = fileReader.result;
-        const byteArray = new Uint8Array(arrayBuffer);
-        const chunkSize = MAXIMUM_FILE_SIZE;
-        const chunks = Math.ceil(byteArray.length / chunkSize);
-        for (let i = 0; i < chunks; i++) {
-            while (sendChannel.bufferedAmount > MAXIMUM_FILE_SIZE) {
-                new Promise(resolve => setTimeout(resolve, 100));
+                    a.href = url;
+                    console.log("File name is : " + FILE_NAME)
+                    a.download = FILE_NAME;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    const hash = cryptojs.MD5(blob);
+                    console.log("Hash: " + hash);
+                }
+            } catch (err) {
+                console.log(err)
             }
-            const start = i * chunkSize;
-            const end = start + chunkSize;
-            const chunk = byteArray.slice(start, end);
-            const chunkBuffer = new Uint8Array(chunk);
-            const chunkArrayBuffer = chunkBuffer.buffer;
-            sendChannel.send(chunkArrayBuffer);
-        }
-        sendChannel.send(END_OF_FILE);
-    }
-}
-
-
-
+            // console.log(event.data)
+        };
+        sendChannel.onclose = () => {
+            console.log("Channel closed");
+        };
+        peerConnection.channel = sendChannel;
+    };
 }
 const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList, peerlocation,zipLocation) =>{
-    var button3 = document.getElementById("backupNow");
-    var button4 = document.getElementById("recoverNow");
-    var button5 = document.getElementById("recieveNow");
-
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -276,7 +272,6 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
     
     peerConnection.onicecandidate = (event) => {
         event.candidate && offerCandidates.add(event.candidate.toJSON());
-
     };
     
 
@@ -326,46 +321,14 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
         send();
     }
     
-    sendChannel.onmessage = (event) => {
+    sendChannel.onopen = () => {
+        const filename = zipLocation;
+        var readyState = sendCHannel.readyState;
+        sendChannel.send("Name" + filename);
         
-        console.log(location);
-        // if message equals sending , get ready to recieve blob
-        if (event.data === "SENDING") {
-            const END_OF_FILE = 'EOF';
-            const data = event.data;
-            try{
-                if(data === END_OF_FILE){
-                    recievedbuffer.push(data);
-                }
-                else{
-                    const arrayBuffer = receivedbuffer.reduce((acc, curr) => {
-                        const tmp = new Uint8Array(acc.byteLength + curr.byteLength);
-                        tmp.set(new Uint8Array(acc), 0);
-                        tmp.set(new Uint8Array(curr), acc.byteLength);
-                        return tmp.buffer;
-                    }, new ArrayBuffer(0));
-                    const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    console.log("File name is : " + FILE_NAME)
-                    a.download = FILE_NAME;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    const hash = cryptojs.MD5(blob);
-                    console.log("Hash: " + hash);
-                }
-            }catch(e){
-                console.log(e);
-            }
-        }
-        //send file name to main.js
     }
-   
 
-}   
-
-
+}
 
 
 
