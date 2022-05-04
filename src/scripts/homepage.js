@@ -234,6 +234,7 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
                     // window.URL.revokeObjectURL(url);
                     // const hash = cryptojs.MD5(blob);
                     // console.log("Hash: " + hash);
+                    console.log("File recieved")
                 }
             } catch (err) {
                 console.log(err)
@@ -355,6 +356,7 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
             // const hash = cryptojs.MD5(arrayBuffer);
             // console.log("Hash: " + hash);
             sendChannel.send(END_of_FILE);
+            console.log("File sent");
         }
     }
     if (readyState == "closed") {
