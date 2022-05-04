@@ -46,8 +46,13 @@ async function init(){
     var GROUP_ID = await ipcRenderer.invoke('GETGROUPID');
     var filler = document.getElementById("filler");
     var filler2 = document.getElementById("filler2");
-    var location = await ipcRenderer.invoke('GETPEERLOCATION');
+    if(PAIRS.length > 1){
+        var location1 = await ipcRenderer.invoke('GETPEERLOCATION');
+    }
+    
+    console.log("Location: " + location);
     var Backupzip = await ipcRenderer.invoke('GETBACKUPZIP');
+    console.log(Backupzip)
     console.log("Location: " + location);
     var content = `
     <div class="p-3 mb-2 bg-secondary  text-white">
@@ -109,19 +114,18 @@ async function init(){
     var button5 = document.getElementById("recieveNow");
     button3.onclick = function () {
         //Send files
-        createConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList, location, Backupzip);
+        createConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList, location1, Backupzip);
 
     }
     button5.onclick = function () {
         //Recieve files
-        recieveConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList, location, Backupzip);
+        recieveConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList, location1, Backupzip);
 
     }
 }
 const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAME,GROUP_ID,FilesList,peerLocation,zipLocation) =>{
     var button3 = document.getElementById("backupNow");
     var button5 = document.getElementById("recieveNow");
-    
     
     
     if (!firebase.apps.length) {
@@ -219,21 +223,24 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
                     var peerLocation = peerLocation;
                     //write file to disk location 
                     var file = new File([blob], FILE_NAME, { type: 'application/octet-stream' });
-                    var reader = new FileReader();
-                    reader.readAsArrayBuffer(file);
-                    reader.onload = function (event) {
-                        var arrayBuffer = event.target.result;
-                        var blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
-                        var url = window.URL.createObjectURL(blob);
-                        var a = document.createElement('a');
-                    }
-                    // a.href = url;
-                    // console.log("File name is : " + FILE_NAME)
-                    // a.download = FILE_NAME;
-                    // a.click();
-                    // window.URL.revokeObjectURL(url);
-                    // const hash = cryptojs.MD5(blob);
-                    // console.log("Hash: " + hash);
+                    // var reader = new FileReader();
+                    // reader.readAsArrayBuffer(file);
+                    // reader.onload = function (event) {
+                    //     var arrayBuffer = event.target.result;
+                    //     var blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+                    //     var fileReader = new FileReader();
+                    //     console.log(peerLocation)
+                    //     fileReader.onload = function (event) {
+                    //         fs.writeFile(peerLocation, Buffer.from(new Uint8Array(this.result)));
+                    //     }
+                    // }
+                    a.href = url;
+                    console.log("File name is : " + FILE_NAME)
+                    a.download = FILE_NAME;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    const hash = cryptojs.MD5(blob);
+                    console.log("Hash: " + hash);
                     console.log("File recieved")
                 }
             } catch (err) {
