@@ -649,9 +649,15 @@ ipcMain.on("RESTORE", (event, arg) => {
   event.sender.send("RESTORE", key);
 });
 
+ipcMain.handle("GETPEERLOCATION", (event, arg) => {
+  return app.getPath('userData') + "/" + "Files" + "/" + "USERIDS" + "/" + USERS.PAIRS[0][2];
+}
+);
 
-
-
+ipcMain.handle("GETBACKUPZIP", (event, arg) => {
+  return app.getPath('userData') + "/" + "Files" + "/" + "USERIDS" + "/" + USER_ID + "/" + "backup.zip";
+  }
+  );
 
 
 
