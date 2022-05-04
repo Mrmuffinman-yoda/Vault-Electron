@@ -35,11 +35,10 @@
       <symbol id="home" viewBox="0 0 16 16">
         <path d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4H2.5z"/>
       </symbol>
-    </svg>
+</svg>
     
     <main>
       <h1 class="visually-hidden">Sidebars examples</h1>
-
       <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
         <a  class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="32" fill="currentColor" class="bi bi-x-diamond-fill" viewBox="0 0 16 16">
@@ -64,17 +63,17 @@
           <li>
             <a id = "addFriend" href="#" class="nav-link text-white">
               <svg class="bi me-2" width="16" height="16"><use xlink:href="#table"/></svg>
-              Friends
+              Add users
             </a>
           </li>
           <li>
-            <a href="#" class="nav-link text-white">
+            <a id = "BackupSettings" href="#" class="nav-link text-white">
               <svg class="bi me-2" width="16" height="16"><use xlink:href="#grid"/></svg>
-              Backup Schedule
+              Backup settings
             </a>
           </li>
           <li>
-            <a href="#" class="nav-link text-white">
+            <a id ="help" href="#" class="nav-link text-white">
               <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>
               Help
             </a>
@@ -122,8 +121,9 @@
               <div class="col">
                 <div id = "jumbo" class="jumbotron jumbotron-fluid">
                   <div class="container">
-                    <h1 class="display-4">Backup Pending</h1>
-                    <p class="lead">This is a modified jumbotron that occupies the entire horizontal space of its parent.</p>
+                    <h1 class="display-4">Backup </h1>
+                    <div id="InputFiller"> 
+                      </div>
                   </div>
                 </div>
               </div>
@@ -131,11 +131,10 @@
         </div>
         </div>
       </div>
-      
     </main>
-          <script src="../scripts/sidebars.js"></script>
-          <script src ="../scripts/homepage.js"></script>
-    <script src="../../renderer.js"></script>
+    <script src="../scripts/sidebars.js"></script>
+  <script src ="../scripts/homepage.js"></script>
+  <script src="../../renderer.js"></script>
   </body>
 </html>
 <style>

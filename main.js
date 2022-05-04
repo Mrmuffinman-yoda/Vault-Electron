@@ -1,10 +1,11 @@
-const {app, BrowserWindow, Menu , ipcMain, ipcRenderer, remote} = require('electron')
+const {app, BrowserWindow, Menu , ipcMain, ipcRenderer} = require('electron')
 const fs = require('fs');
 const path = require('path');
 var cryptojs = require("crypto-js");
 const crypto = require('crypto');
 const ClientId = "970034993361473546";
 const DiscordRPC = require("discord-rpc");
+var fsUtils = require("nodejs-fs-utils");
 const RPC = new DiscordRPC.Client({ transport: 'ipc' });
 DiscordRPC.register(ClientId);
 
@@ -110,6 +111,7 @@ function createWindow () {
     // transmit username to homepage
   }
   else{
+    
     mainWindow.loadFile('index.html')
     console.log("User folder does not exist")
     var userData;
@@ -125,7 +127,6 @@ function createWindow () {
       USERS: [],
       PAIRS: [],
       LEADER:"",
-
     };
     var USER_ID = "";
   }
@@ -166,8 +167,9 @@ ipcMain.on("finish", (event, arg) => {
         PAIRS: USERS.PAIRS,
         LEADER: LEADER_ID
       }
+    }
   }
-}
+
   
   //  if folder exists,dont make a new one
   if (fs.existsSync(USER_FOLDER)) {
@@ -175,6 +177,8 @@ ipcMain.on("finish", (event, arg) => {
     console.log(USER_FOLDER)
   }
   else {
+    var USER_DOWNLOAD = USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID;
+   
     fs.mkdir(USER_FOLDER, { recursive: true }, (err) => {
       if (err) {
         console.log(err);
@@ -205,13 +209,30 @@ ipcMain.on("finish", (event, arg) => {
           preload: path.join(__dirname, 'preload.js'),
         }
       })
-      window.close();
+      var OwnFolder = app.getPath('userData') + "/" + "Files" + "/" + "USERIDS" + "/" + USER_ID;
+      if(fs.existsSync(OwnFolder)){
+        console.log("Own folder exists");
+      }
+      else{
+        fs.mkdir(OwnFolder, { recursive: true }, (err) => {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            console.log('Directory created successfully');
+          }
+        });
+      }
+      var window = remote.BrowserWindow.getAllWindows()[0]
+      window.close()
       secondaryWindow.loadFile('./src/pages/homepage.html')
     });
+    
   }
 });
 //#region readUserdata
 readUserfiles = function () {
+  var Downloads = app.getPath("desktop") + "/Vault";
   var userDataFile = USER_FOLDER + "/" + "USER" + ".json";
   console.log(userDataFile);
   console.log("User data file: " + userDataFile);
@@ -245,8 +266,8 @@ readUserfiles = function () {
 //Users constants which will get filled when file is read
 
 //#region empty variables
+var Downloads = app.getPath("desktop") + "/Vault";
 var USER_FOLDER = app.getPath('userData') + "/" + "users";
-var USER_DOWNLOAD = USER_FOLDER + "/" + "download";
 console.log(USER_FOLDER);
 var GROUP_ID;
 var USER_NAME;
@@ -328,7 +349,24 @@ ipcMain.on("GROUP", (event, arg) => {
 });
 
 
-
+ipcMain.on("BACKUPWINDOW", (event, arg) => {
+  var addWindow = new BrowserWindow({
+    width: 700,
+    height: 700,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
+      autoHideMenuBar: true,
+      webSecurity: false,
+      icon: './src/logo.ico',
+    }
+  });
+  addWindow.loadFile('./src/pages/backupSettings.html');
+  addWindow.on('closed', function () {
+    addWindow = null
+  })
+});
 
 //#endregion
 //make new window to add friends
@@ -387,11 +425,46 @@ ipcMain.on("RECIEVERWINDOW", (event, arg) => {
     addWindow = null
   })
 });
+ipcMain.on("HELPWINDOW", (event, arg) => {
+  var addWindow = new BrowserWindow({
+    width: 500,
+    height: 500,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
+      autoHideMenuBar: true,
+      webSecurity: false,
+      icon: './src/logo.ico',
+    }
+  });
+  addWindow.loadFile('./src/pages/help.html');
+  addWindow.on('closed', function () {
+    addWindow = null
+  })
+});
 //#endregion
 // send groupID to addFriend.html
 
 //Recieving data
 ipcMain.on("SETPAIRID", (event, arg,arg2,arg3) => {
+  var Downloads = app.getPath("desktop") + "/Vault";
+  if(!fs.existsSync(Downloads)){
+    fs.mkdirSync(Downloads);
+  }
+  var files = app.getPath('userData') + "/" + "Files"
+  if (!fs.existsSync(files)) {
+    fs.mkdirSync(files);
+  }
+  var userIDSFolder = files + "/" + "USERIDS";
+  if (!fs.existsSync(userIDSFolder)) {
+    fs.mkdirSync(userIDSFolder);
+  }
+  var pairFolder = app.getPath('userData') + "/" + "Files" + "/" + "USERIDS" + "/"+ arg;
+  //make folder for pairFolder
+  if (!fs.existsSync(pairFolder)) {
+    fs.mkdirSync(pairFolder);
+  }
   console.log(USER_ID)
   LEADER_ID = arg3
   var pairArray = [USER_ID, arg, arg3];
@@ -409,7 +482,6 @@ ipcMain.on("SETPAIRID", (event, arg,arg2,arg3) => {
     userData.USERS.USERS.push(arg2);
     //write to file
     fs.writeFileSync(userDataFile, JSON.stringify(userData));
-    mainWindow.reload();
   }
   else {
     console.log("User data file does not exist");
@@ -437,6 +509,93 @@ ipcMain.on("SETUSERS", (event, arg) => {
 
 
 
+//check if downloads folder has files in it and send location to homepage.js
+ipcMain.on("CHECKDOWNLOADS", (event, arg) => {
+  var Downloads = app.getPath("desktop") + "/Vault";
+  if (fs.existsSync(Downloads)) {
+    var files = fs.readdirSync(Downloads);
+    event.sender.send("CHECKDOWNLOADS", files);
+  }
+  else {
+    event.sender.send("CHECKDOWNLOADS", "No files");
+  }
+});
+
+ipcMain.handle("GETFILES", async (event, arg) => {
+  var Downloads = app.getPath("desktop") + "/Vault";
+  if (fs.existsSync(Downloads)) {
+    var files = fs.readdirSync(Downloads);
+    return files;
+  }
+  else {
+    return "No files";
+  }
+}
+);
+// encrypt files from downloads folder and save them in files of USER_ID
+ipcMain.on("ENCRYPT", (event, arg) => {
+  var Downloads = app.getPath("desktop") + "/Vault";
+  if (fs.existsSync(Downloads)) {
+    var files = fs.readdirSync(Downloads);
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var filePath = Downloads + "/" + file;
+      var fileData = fs.readFileSync(filePath);
+      var encryptedFile = encrypt(fileData, USER_ID);
+      var encryptedFilePath = USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID
+      fs.writeFileSync(encryptedFilePath, encryptedFile);
+      fs.unlinkSync(filePath);
+    }
+  }
+  else {
+    console.log("No files");
+  }
+}
+);
+// decrypt files from files of USER_ID and save them in a new folder in downloads
+ipcMain.on("DECRYPT", (event, arg) => {
+  var files = fs.readdirSync(USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID);
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    var filePath = USER_FOLDER + "/" + "USERIDS" + "/" + USER_ID + "/" + file;
+    var fileData = fs.readFileSync(filePath);
+    var decryptedFile = decrypt(fileData, USER_ID);
+    var decryptedFilePath = app.getPath("desktop") + "/Vault" + "/" + file;
+    fs.writeFileSync(decryptedFilePath, decryptedFile);
+    fs.unlinkSync(filePath);
+  }
+}
+);
+    
+// check if download folder is less than allocated_size
+ipcMain.on("CHECKDOWNLOADSSIZE", (event, arg) => {
+  var size;
+  // check download folder size
+  fsUtils.fsizeSync(Downloads, function (err, size) {
+      size = size / 1000000000;
+      console.log("Download folder size: " + size);
+      if (size < ALLOCATED_SIZE) {
+        console.log("RETURNING TRUE");
+        return size
+      }
+      else {
+        console.log("RETURNING FALSE");
+        return size
+      }
+  });
+  return size;
+});
+
+//check if downloads folder is less than allocated_size
+ipcMain.handle("GETDOWNLOADS", async (event, arg) => {
+  var Downloads = app.getPath("desktop") + "/Vault";
+  return Downloads;
+});
+
+
+
+
+
 
 
 
@@ -444,7 +603,7 @@ ipcMain.handle("GETCONFIG", (event, arg) => {
   return firebaseConfig;
 });
 ipcMain.handle("GETFIRSTTIME", (event, arg) => {
-  return FIRSTTIME;
+  return firsttime;
 });
 
 ipcMain.handle("GETGROUP", (event, arg) => {
@@ -473,7 +632,6 @@ ipcMain.handle("GETNICKNAME", (event, arg) => {
 ipcMain.handle("GETUSERID", (event, arg) => {
   return USER_ID;
 });
-
 
 
 

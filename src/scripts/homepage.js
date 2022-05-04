@@ -3,8 +3,9 @@ const fs = require('fs');
 const path = require('path');
 var cryptojs = require("crypto-js");
 const crypto = require('crypto');
+var fsUtils = require("nodejs-fs-utils");
 var GROUP;
-
+var size;
 
 window.onload = function() {
     init();
@@ -18,8 +19,17 @@ window.onload = function() {
 //     GROUP = arg;
 // });
 
+fsUtils.fsize(ipcRenderer.invoke('GETDOWNLOADS'), function (errs, size) {
+    var size = size / 1000000000;
+    console.log("Download folder size: " + size);
+});
 
-async function init(){
+async function init(size){
+  
+    
+    var FilesList = await ipcRenderer.invoke("GETFILES")
+    console.log("Files List: "+FilesList);
+    console.log("Folder Size: "+ size);
     var firebaseConfig = await ipcRenderer.invoke('GETCONFIG');
     var GROUP = await ipcRenderer.invoke('GETGROUP');
     var PAIRS = await ipcRenderer.invoke('GETPAIRS');
@@ -41,6 +51,7 @@ async function init(){
             </div>
         </div>
     </div>`;
+    console.log("Is it too big ? :" + size);
     document.getElementById("userWelcome").innerHTML = "Welcome back " + USERNAME + "!";
     console.log("GROUP: "+GROUP)
     console.log("PAIRS: "+ PAIRS) 
@@ -53,17 +64,17 @@ async function init(){
     else if (PAIRS.length = 0) {
         filler.innerHTML = "You have no group yet, please create one";
     }
+    console.log("SIZE: " + size)
     var button = document.getElementById("Single pairer");
     var button2 = document.getElementById("Single Paree");
     button.onclick = function () {
-        createConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME,GROUP_ID);
-    }
+        createConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList);
     button2.onclick = function () {
-        recieveConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME,GROUP_ID);
+        recieveConnection(firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList);
     }
-
 }
-const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAME,GROUP_ID) =>{
+}
+const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAME,GROUP_ID,FilesList) =>{
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -136,7 +147,7 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
 
 
 }
-const createConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAME,GROUP_ID) =>{
+const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME, GROUP_ID, FilesList) =>{
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
@@ -271,19 +282,21 @@ const createConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNAM
 
 
 const addFriend = document.getElementById("addFriend");
-
+const backupButton = document.getElementById("BackupSettings");
+const help = document.getElementById("help");
 addFriend.onclick = function () {
-    //tell main to make new window
     ipcRenderer.send('ADDFRIENDWINDOW');
 }
 senderButton.onclick = function () {
-    //tell main to make new window
     ipcRenderer.send('SENDERWINDOW');
 }
 
 recieverButton.onclick = function () {
-    //tell main to make new window
     ipcRenderer.send('RECIEVERWINDOW');
 }
-
-
+backupButton.onclick = function () {
+    ipcRenderer.send('BACKUPWINDOW');
+}
+help.onclick = function () {
+    ipcRenderer.send('HELPWINDOW');
+}
