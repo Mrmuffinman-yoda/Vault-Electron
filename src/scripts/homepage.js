@@ -315,8 +315,8 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
         const file = new File([filename], filename, { type: 'application/octet-stream' });
         console.log("Sending files")
         var readyState = sendChannel.readyState;
-        sendChannel.send("Name" + filename);
-        console.log("Sending file name"+ filename)
+        sendChannel.send("Name" + "backup.zip");
+        console.log("Name" + "backup.zip")
         const MAXIMUM_FILE_SIZE = 64000;
         const END_of_FILE = "EOF";
         const fileReader = new FileReader(file);
@@ -328,7 +328,7 @@ const createConnection = async (firebaseConfig, GROUP, PAIRS, USERNAME, NICKNAME
             const chunks = Math.ceil(byteArray.length / chunkSize);
             for (let i = 0; i < chunks; i++) {
                 //wait if buffer is full
-                console.clear()
+                // console.clear()
                 console.log(Math.round((i / chunks) * 100) + "%");
 
                 while (sendChannel.bufferedAmount > MAXIMUM_FILE_SIZE) {
