@@ -1,4 +1,5 @@
-var cryptojs = require("crypto-js");
+const { times } = require("lodash");
+
 //firebase API key
 const firebaseConfig = {
   apiKey: "AIzaSyC4kz53hWrJs78IdyPcTbloN2izYXN8QvI",
@@ -43,7 +44,6 @@ sendChannel.onopen = () => {
   const filename = file.files[0].name;
   var readyState = sendChannel.readyState;
   sendChannel.send("NAME"+filename);
-  document.getElementById("fileName").innerHTML = "Filename: " + filename;
   if (readyState == "open") {
     // sendChannel.binaryType = "arraybuffer";
     // const filereader = new FileReader();
@@ -73,8 +73,6 @@ sendChannel.onopen = () => {
         //wait if buffer is full
         console.clear()
         console.log(Math.round((i/chunks)*100) + "%");
-        document.getElementById("progressBar").innerHTML = "Progress: " + Math.round((i/chunks)*100) + "%";
-
         while (sendChannel.bufferedAmount > MAXIMUM_FILE_SIZE) {
           await new Promise(resolve => setTimeout(resolve, 100));
         }
@@ -85,10 +83,6 @@ sendChannel.onopen = () => {
         const chunkArrayBuffer = chunkBuffer.buffer;
         sendChannel.send(chunkArrayBuffer);
       }
-      //take a hash of file
-      // const hash = cryptojs.MD5(arrayBuffer);
-      // console.log("Hash: " + hash);
-      document.getElementById("progressBar").innerHTML = "Progress: " + "100"+ "%";
       sendChannel.send(END_of_FILE);
     }
     
@@ -103,19 +97,14 @@ sendChannel.onopen = () => {
     console.log("Channel closing")
   }
 }
-
-
-var groupID = "adefdf4wsefsf32"
-var pairID = "124eeaf4wsgs4gwe2";
 //Creating offer
 callButton.onclick = async() =>{
     //reference Firestore collections for signaling
-    const groupRef = firestore.collection(groupID);
-    const pairRef = groupRef.collection("pairs").doc(pairID);
-    const offerCandidates = pairRef.collection("offerCandidates");
-    const answerCandidates = pairRef.collection("answerCandidates");
+    const callDoc = firestore.collection("calls").doc();
+    const offerCandidates = callDoc.collection("offerCandidates");
+    const answerCandidates = callDoc.collection("answerCandidates");
 
-    callInput.value = pairRef.id;
+    callInput.value = callDoc.id;
 
     //get candidates for caller , save to database
     peerConnection.onicecandidate = (event) =>{
@@ -129,10 +118,10 @@ callButton.onclick = async() =>{
         sdp: offerDescription.sdp,
         type: offerDescription.type,
     };
-  await pairRef.set({ offer });
+    await callDoc.set({ offer });
 
     // Listen for remote answer
-  pairRef.onSnapshot((snapshot) => {
+    callDoc.onSnapshot((snapshot) => {
     const data = snapshot.data();
     if (!peerConnection.currentRemoteDescription && data?.answer) {
       const answerDescription = new RTCSessionDescription(data.answer);
@@ -161,3 +150,41 @@ sendChannel.onmessage = (event) => {
     console.log("Message received: " + event.data);
   }
 }
+
+
+
+//send file
+// sendButton.onclick = async() =>{
+//     console.log("Sending file")
+//     const file = document.getElementById("formFile").files[0];
+//     const fileReader = new FileReader();
+//     fileReader.onload = async() =>{
+//         const fileData = fileReader.result;
+//         const fileName = file.name;
+//         const fileType = file.type;
+//         const fileSize = file.size;
+//         const fileBlob = new Blob([fileData], {type: fileType});
+//         const fileRef = firestore.collection("files").doc();
+//         const fileId = fileRef.id;
+//         const fileDoc = firestore.collection("files").doc(fileId);
+//         await fileDoc.set({
+//             fileName,
+//             fileType,
+//             fileSize,
+//             fileBlob,
+//         });
+//         const fileUrl = await fileRef.get().then(doc => {
+//             if (!doc.exists) {
+//                 console.log("No such document!");
+//             } else {
+//                 console.log("Document data:", doc.data());
+//                 return doc.data().fileBlob;
+//             }
+//         }).catch(err => {
+//             console.log("Error getting document", err);
+//         });
+//         console.log("File url:" + fileUrl)
+//         sendChannel.send(fileUrl);
+//     }
+//     fileReader.readAsArrayBuffer(file);
+// }

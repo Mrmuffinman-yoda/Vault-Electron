@@ -23,12 +23,6 @@ function setActivity() {
     smallImageKey: "vaultsmall",
     smallImageText: "Vault",
     instance: false,
-    buttons:[
-        {
-          "label": 'Github',
-          "url": 'https://github.com/Mrmuffinman-yoda/Vault-Electron'
-        }
-      ]
   });
 }
 RPC.on("ready", () => {
