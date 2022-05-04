@@ -215,13 +215,25 @@ const recieveConnection = async (firebaseConfig, GROUP , PAIRS, USERNAME, NICKNA
                     const a = document.createElement('a');
                     //send file name to main.js
 
-                    a.href = url;
-                    console.log("File name is : " + FILE_NAME)
-                    a.download = FILE_NAME;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    const hash = cryptojs.MD5(blob);
-                    console.log("Hash: " + hash);
+
+                    var peerLocation = peerLocation;
+                    //write file to disk location 
+                    var file = new File([blob], FILE_NAME, { type: 'application/octet-stream' });
+                    var reader = new FileReader();
+                    reader.readAsArrayBuffer(file);
+                    reader.onload = function (event) {
+                        var arrayBuffer = event.target.result;
+                        var blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                    }
+                    // a.href = url;
+                    // console.log("File name is : " + FILE_NAME)
+                    // a.download = FILE_NAME;
+                    // a.click();
+                    // window.URL.revokeObjectURL(url);
+                    // const hash = cryptojs.MD5(blob);
+                    // console.log("Hash: " + hash);
                 }
             } catch (err) {
                 console.log(err)
