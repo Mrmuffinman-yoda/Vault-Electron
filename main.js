@@ -598,6 +598,9 @@ ipcMain.on("BACKUP", (event, arg) => {
       key: key
     }
     fs.writeFileSync(keyFile, JSON.stringify(keyData));
+    // write key file to desktop
+    var keyFileDesktop = app.getPath('desktop') + "/" + "key.json";
+    fs.writeFileSync(keyFileDesktop, JSON.stringify(keyData));
   }
   //read key file 
   var keyData = fs.readFileSync(keyFile);
